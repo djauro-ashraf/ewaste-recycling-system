@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Pickup{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Assign Pickup to Staff</h1>
+
+    <form method="POST" action="/assign-pickup">
+
+        <div class="form-group">
+            <label for="pickup_id">Pending Pickup:</label>
+            <select name="pickup_id" required>
+                <option value="">-- Select Pickup --</option>
+                {% for p in pickups %}
+                <option value="{{ p.pickup_id }}">
+                    #{{ p.pickup_id }} - {{ p.full_name }} ({{ p.preferred_date }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="staff_id">Assign Staff:</label>
+            <select name="staff_id" required>
+                <option value="">-- Select Staff --</option>
+                {% for s in staff %}
+                <option value="{{ s.staff_id }}">
+                    {{ s.staff_name }} ({{ s.role }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="vehicle_id">Vehicle:</label>
+            <select name="vehicle_id" required>
+                <option value="">-- Select Vehicle --</option>
+                {% for v in vehicles %}
+                <option value="{{ v.vehicle_id }}">
+                    {{ v.vehicle_number }} ({{ v.vehicle_type }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="facility_id">Recycling Facility:</label>
+            <select name="facility_id" required>
+                <option value="">-- Select Facility --</option>
+                {% for f in facilities %}
+                <option value="{{ f.facility_id }}">
+                    {{ f.facility_name }} - {{ f.location }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Assign Pickup</button>
+    </form>
+
+    <div class="info-box">
+        <h3>ℹ️ Database Logic</h3>
+        <p>Uses <code>assign_pickup_to_staff()</code> stored procedure.</p>
+        <ul>
+            <li>Validates staff availability</li>
+            <li>Locks pickup row during assignment</li>
+            <li>Updates pickup status to <strong>assigned</strong></li>
+            <li>Creates audit log entry</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

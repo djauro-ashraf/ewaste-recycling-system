@@ -64,20 +64,24 @@ DECLARE
 BEGIN
     -- Pickup 1
     CALL create_pickup_request(
-        1,
-        CURRENT_DATE + 2,
-        'House 12, Road 5, Dhanmondi, Dhaka',
-        'Old smartphones and chargers',
-        v_pickup_id
-    );
+    v_pickup_id,
+    1,
+    CURRENT_DATE + 2,
+    'House 12, Road 5, Dhanmondi, Dhaka',
+    'Old smartphones and chargers'
+);
 
-    CALL add_item_to_pickup(
-        v_pickup_id, 1,
-        'Samsung Galaxy S10 (broken screen)',
-        'broken', 0.18,
-        '{"screen_condition":"cracked","battery_health":"poor"}',
-        v_item_id
-    );
+
+   CALL add_item_to_pickup(
+    v_item_id,
+    v_pickup_id,
+    1,
+    'Samsung Galaxy S10 (broken screen)',
+    'broken',
+    0.18,
+    '{"screen_condition":"cracked","battery_health":"poor"}'
+);
+
 
     CALL add_item_to_pickup(
         v_pickup_id, 1,
@@ -97,7 +101,14 @@ BEGIN
 
     CALL assign_pickup_to_staff(v_pickup_id, 1, 1, 1, CURRENT_TIMESTAMP + INTERVAL '2 days');
     CALL complete_pickup_collection(v_pickup_id);
-    CALL process_payment(v_pickup_id, 'bank_transfer', 'TXN-2025-001', v_payment_id, v_payment_amount);
+    CALL process_payment(
+    v_payment_id,
+    v_payment_amount,
+    v_pickup_id,
+    'bank_transfer',
+    'TXN-2025-001'
+);
+
 
     -- Pickup 2
     CALL create_pickup_request(
@@ -178,11 +189,12 @@ BEGIN
 
     -- Create batch
     CALL create_recycling_batch(
-        1,
-        'Electronics Batch Jan 2025',
-        'First batch of the month - electronics focus',
-        v_batch_id
-    );
+    v_batch_id,
+    1,
+    'Electronics Batch Jan 2025',
+    'First batch of the month - electronics focus'
+);
+
 
     RAISE NOTICE 'Sample data inserted successfully';
     RAISE NOTICE 'Created % pickups', 5;

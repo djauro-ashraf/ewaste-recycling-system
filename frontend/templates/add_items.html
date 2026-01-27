@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Add Items to Pickup{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Add Items to Pickup</h1>
+    
+    <form method="POST" action="/add-items">
+        <div class="form-group">
+            <label for="pickup_id">Select Pickup Request:</label>
+            <select name="pickup_id" id="pickup_id" required>
+                <option value="">-- Choose Pickup --</option>
+                {% for pickup in pickups %}
+                <option value="{{ pickup.pickup_id }}">
+                    Pickup #{{ pickup.pickup_id }} - User #{{ pickup.user_id }} - 
+                    {{ pickup.preferred_date }} ({{ pickup.status }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="category_id">E-Waste Category:</label>
+            <select name="category_id" id="category_id" required>
+                <option value="">-- Choose Category --</option>
+                {% for category in categories %}
+                <option value="{{ category.category_id }}">
+                    {{ category.category_name }} 
+                    (₹{{ "%.2f"|format(category.base_price_per_kg|float) }}/kg, 
+                    Hazard: {{ category.hazard_level }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Item Description:</label>
+            <textarea name="description" id="description" rows="2" required
+                      placeholder="E.g., Samsung Galaxy S10 with broken screen"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="condition">Item Condition:</label>
+            <select name="condition" id="condition" required>
+                <option value="working">Working</option>
+                <option value="broken" selected>Broken</option>
+                <option value="repairable">Repairable</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="estimated_weight">Estimated Weight (kg):</label>
+            <input type="number" name="estimated_weight" id="estimated_weight" 
+                   step="0.01" min="0.01" placeholder="e.g., 0.5">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Add Item</button>
+            <a href="/items" class="btn btn-secondary">View All Items</a>
+        </div>
+    </form>
+
+    <div class="info-box">
+        <h3>ℹ️ Database Operations</h3>
+        <p>This form calls the <code>add_item_to_pickup()</code> procedure which:</p>
+        <ul>
+            <li>Validates pickup exists and is in valid status (pending/assigned)</li>
+            <li>Validates category exists</li>
+            <li>Inserts item into items table</li>
+            <li>Automatically updates pickup total_weight_kg</li>
+            <li>Automatically calculates total_amount based on pricing rules</li>
+            <li>Triggers audit log entry</li>
+            <li>If category hazard_level >= 4, triggers alert</li>
+        </ul>
+        <p><strong>Price Calculation:</strong> Uses <code>calculate_item_price()</code> function 
+           with dynamic pricing rules from the database.</p>
+    </div>
+</div>
+{% endblock %}

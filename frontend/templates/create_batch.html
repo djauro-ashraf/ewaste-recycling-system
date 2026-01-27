@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Create Batch{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Create Recycling Batch</h1>
+
+    <form method="POST">
+        <div class="form-group">
+            <label>Facility:</label>
+            <select name="facility_id" required>
+                {% for f in facilities %}
+                <option value="{{ f.facility_id }}">
+                    {{ f.facility_name }} ({{ f.location }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Batch Name:</label>
+            <input type="text" name="batch_name" required>
+        </div>
+
+        <div class="form-group">
+            <label>Notes:</label>
+            <textarea name="notes"></textarea>
+        </div>
+
+        <button class="btn btn-primary">Create Batch</button>
+    </form>
+
+    <div class="info-box">
+        <p>Calls <code>create_recycling_batch()</code>.</p>
+    </div>
+</div>
+{% endblock %}

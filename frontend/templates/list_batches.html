@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Recycling Batches{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <h1>Recycling Batches</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Batch</th>
+                <th>Facility</th>
+                <th>Status</th>
+                <th>Total Weight (kg)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in batches %}
+            <tr>
+                <td>{{ b.batch_name }}</td>
+                <td>{{ b.facility_name }}</td>
+                <td>{{ b.status }}</td>
+                <td>{{ "%.2f"|format(b.total_weight_kg|float) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/create-batch" class="btn btn-primary">Create Batch</a>
+</div>
+{% endblock %}

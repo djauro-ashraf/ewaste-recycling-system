@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Payments{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <h1>Payments</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Pickup</th>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in payments %}
+            <tr>
+                <td>{{ p.payment_id }}</td>
+                <td>#{{ p.pickup_id }}</td>
+                <td>{{ p.user_name }}</td>
+                <td>{{ "%.2f"|format(p.amount|float) }}</td>
+                <td>{{ p.payment_method }}</td>
+                <td>{{ p.payment_time }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="info-box">
+        <p>Source: <code>v_payment_summary</code></p>
+    </div>
+</div>
+{% endblock %}

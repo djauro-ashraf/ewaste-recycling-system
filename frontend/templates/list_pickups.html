@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Pickup Requests{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <h1>Pickup Requests</h1>
+    
+    <div style="margin-bottom: 20px;">
+        <a href="/create-pickup" class="btn btn-primary">Create New Pickup</a>
+        <a href="/add-items" class="btn btn-secondary">Add Items</a>
+        <a href="/assign-pickup" class="btn btn-secondary">Assign Pickup</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Request Date</th>
+                <th>Preferred Date</th>
+                <th>Status</th>
+                <th>Items</th>
+                <th>Weight (kg)</th>
+                <th>Amount (₹)</th>
+                <th>Staff</th>
+                <th>Vehicle</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pickup in pickups %}
+            <tr>
+                <td>{{ pickup.pickup_id }}</td>
+                <td>{{ pickup.user_name }}</td>
+                <td>{{ pickup.request_date.strftime('%Y-%m-%d') if pickup.request_date else 'N/A' }}</td>
+                <td>{{ pickup.preferred_date }}</td>
+                <td>
+                    <span class="status-badge status-{{ pickup.status }}">
+                        {{ pickup.status }}
+                    </span>
+                </td>
+                <td>{{ pickup.item_count or 0 }}</td>
+                <td>{{ "%.2f"|format(pickup.total_weight_kg|float) if pickup.total_weight_kg else '0.00' }}</td>
+                <td>{{ "%.2f"|format(pickup.total_amount|float) if pickup.total_amount else '0.00' }}</td>
+                <td>{{ pickup.staff_name or 'Not assigned' }}</td>
+                <td>{{ pickup.vehicle_number or 'Not assigned' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if not pickups %}
+    <p style="text-align: center; padding: 40px; color: #999;">No pickup requests found. Create one to get started!</p>
+    {% endif %}
+
+    <div class="info-box">
+        <h3>ℹ️ Data Source</h3>
+        <p>This table displays data from the <code>v_pickup_summary</code> view, which combines data from:</p>
+        <ul>
+            <li>pickup_requests table</li>
+            <li>users table</li>
+            <li>staff_assignments table</li>
+            <li>vehicles table</li>
+            <li>recycling_facilities table</li>
+            <li>items table (aggregated)</li>
+        </ul>
+        <p>All JOINs and calculations are done in the database view.</p>
+    </div>
+</div>
+{% endblock %}

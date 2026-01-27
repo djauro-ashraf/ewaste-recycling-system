@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Items{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <h1>All Items</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Pickup</th>
+                <th>Category</th>
+                <th>Condition</th>
+                <th>Weight (kg)</th>
+                <th>Price (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in items %}
+            <tr>
+                <td>{{ i.item_id }}</td>
+                <td>#{{ i.pickup_id }}</td>
+                <td>{{ i.category_name }}</td>
+                <td>{{ i.condition }}</td>
+                <td>{{ "%.2f"|format(i.actual_weight_kg|float) }}</td>
+                <td>{{ "%.2f"|format(i.calculated_price|float) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="info-box">
+        <p>Source: <code>v_item_details</code></p>
+    </div>
+</div>
+{% endblock %}

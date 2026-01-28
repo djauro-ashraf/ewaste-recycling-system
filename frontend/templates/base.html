@@ -3,31 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Waste Recycling System - {% block title %}Dashboard{% endblock %}</title>
+    <title>{% block title %}E-Waste Recycling System{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <h1 class="logo">♻️ E-Waste Recycling System</h1>
-            <ul class="nav-menu">
-                <li><a href="/">Dashboard</a></li>
-                <li><a href="/pickups">Pickups</a></li>
-                <li><a href="/items">Items</a></li>
-                <li><a href="/staff-dashboard">Staff</a></li>
-                <li><a href="/payments">Payments</a></li>
-                <li><a href="/batches">Batches</a></li>
-                <li><a href="/reports">Reports</a></li>
-            </ul>
-        </div>
-    </nav>
+    <header>
+        <h1>E-Waste Recycling Management System</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Dashboard</a> |
+            <a href="{{ url_for('list_pickups') }}">Pickups</a> |
+            <a href="{{ url_for('list_items') }}">Items</a> |
+            <a href="{{ url_for('list_payments') }}">Payments</a> |
+            <a href="{{ url_for('list_batches') }}">Batches</a> |
+            <a href="{{ url_for('staff_dashboard') }}">Staff</a> |
+            <a href="{{ url_for('reports') }}">Reports</a>
+        </nav>
+    </header>
 
-    <div class="container">
+    <main>
+        {% if error %}
+        <div class="error">Error: {{ error }}</div>
+        {% endif %}
+
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
     <footer>
-        <p>E-Waste Recycling Management System | Database-Driven Application</p>
+        <p>E-Waste Recycling System - Database Demo</p>
     </footer>
 </body>
 </html>

@@ -3,78 +3,63 @@
 {% block title %}Add Items to Pickup{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h1>Add Items to Pickup</h1>
-    
-    <form method="POST" action="/add-items">
-        <div class="form-group">
-            <label for="pickup_id">Select Pickup Request:</label>
-            <select name="pickup_id" id="pickup_id" required>
-                <option value="">-- Choose Pickup --</option>
-                {% for pickup in pickups %}
-                <option value="{{ pickup.pickup_id }}">
-                    Pickup #{{ pickup.pickup_id }} - User #{{ pickup.user_id }} - 
-                    {{ pickup.preferred_date }} ({{ pickup.status }})
-                </option>
-                {% endfor %}
-            </select>
-        </div>
+<h2>Add Items to Pickup</h2>
 
-        <div class="form-group">
-            <label for="category_id">E-Waste Category:</label>
-            <select name="category_id" id="category_id" required>
-                <option value="">-- Choose Category --</option>
-                {% for category in categories %}
-                <option value="{{ category.category_id }}">
-                    {{ category.category_name }} 
-                    (₹{{ "%.2f"|format(category.base_price_per_kg|float) }}/kg, 
-                    Hazard: {{ category.hazard_level }})
-                </option>
-                {% endfor %}
-            </select>
-        </div>
+<form method="POST" action="{{ url_for('add_items') }}">
+    <table>
+        <tr>
+            <td><label for="pickup_id">Pickup Request:</label></td>
+            <td>
+                <select name="pickup_id" id="pickup_id" required>
+                    <option value="">-- Select Pickup --</option>
+                    {% for pickup in pickups %}
+                    <option value="{{ pickup.pickup_id }}">
+                        Pickup #{{ pickup.pickup_id }} - User {{ pickup.user_id }} - {{ pickup.preferred_date }} ({{ pickup.status }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="category_id">Category:</label></td>
+            <td>
+                <select name="category_id" id="category_id" required>
+                    <option value="">-- Select Category --</option>
+                    {% for category in categories %}
+                    <option value="{{ category.category_id }}">
+                        {{ category.category_name }} - ${{ category.base_price_per_kg }}/kg (Hazard: {{ category.hazard_level }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="description">Item Description:</label></td>
+            <td><textarea name="description" id="description" rows="3" required></textarea></td>
+        </tr>
+        <tr>
+            <td><label for="condition">Condition:</label></td>
+            <td>
+                <select name="condition" id="condition" required>
+                    <option value="working">Working</option>
+                    <option value="broken" selected>Broken</option>
+                    <option value="repairable">Repairable</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="estimated_weight">Estimated Weight (kg):</label></td>
+            <td><input type="number" step="0.01" name="estimated_weight" id="estimated_weight"></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit">Add Item</button>
+                <a href="{{ url_for('list_items') }}">Cancel</a>
+            </td>
+        </tr>
+    </table>
+</form>
 
-        <div class="form-group">
-            <label for="description">Item Description:</label>
-            <textarea name="description" id="description" rows="2" required
-                      placeholder="E.g., Samsung Galaxy S10 with broken screen"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="condition">Item Condition:</label>
-            <select name="condition" id="condition" required>
-                <option value="working">Working</option>
-                <option value="broken" selected>Broken</option>
-                <option value="repairable">Repairable</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="estimated_weight">Estimated Weight (kg):</label>
-            <input type="number" name="estimated_weight" id="estimated_weight" 
-                   step="0.01" min="0.01" placeholder="e.g., 0.5">
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Add Item</button>
-            <a href="/items" class="btn btn-secondary">View All Items</a>
-        </div>
-    </form>
-
-    <div class="info-box">
-        <h3>ℹ️ Database Operations</h3>
-        <p>This form calls the <code>add_item_to_pickup()</code> procedure which:</p>
-        <ul>
-            <li>Validates pickup exists and is in valid status (pending/assigned)</li>
-            <li>Validates category exists</li>
-            <li>Inserts item into items table</li>
-            <li>Automatically updates pickup total_weight_kg</li>
-            <li>Automatically calculates total_amount based on pricing rules</li>
-            <li>Triggers audit log entry</li>
-            <li>If category hazard_level >= 4, triggers alert</li>
-        </ul>
-        <p><strong>Price Calculation:</strong> Uses <code>calculate_item_price()</code> function 
-           with dynamic pricing rules from the database.</p>
-    </div>
-</div>
+<h3>Recently Added Items</h3>
+<p><a href="{{ url_for('list_items') }}">View All Items</a></p>
 {% endblock %}

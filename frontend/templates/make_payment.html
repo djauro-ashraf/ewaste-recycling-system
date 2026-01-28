@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Process Payment{% endblock %}
+
+{% block content %}
+<h2>Process Payment</h2>
+
+<form method="POST" action="{{ url_for('make_payment') }}">
+    <table>
+        <tr>
+            <td><label for="pickup_id">Pickup (Collected):</label></td>
+            <td>
+                <select name="pickup_id" id="pickup_id" required>
+                    <option value="">-- Select Pickup --</option>
+                    {% for pickup in pickups %}
+                    <option value="{{ pickup.pickup_id }}">
+                        #{{ pickup.pickup_id }} - {{ pickup.full_name }} - {{ pickup.total_weight_kg }}kg - ${{ pickup.total_amount }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="payment_method">Payment Method:</label></td>
+            <td>
+                <select name="payment_method" id="payment_method" required>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="mobile_money">Mobile Money</option>
+                    <option value="cash">Cash</option>
+                    <option value="check">Check</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="transaction_ref">Transaction Reference:</label></td>
+            <td><input type="text" name="transaction_ref" id="transaction_ref"></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit">Process Payment</button>
+                <a href="{{ url_for('list_payments') }}">Cancel</a>
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock %}

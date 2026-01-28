@@ -3,36 +3,42 @@
 {% block title %}Items{% endblock %}
 
 {% block content %}
-<div class="list-container">
-    <h1>All Items</h1>
+<h2>E-Waste Items</h2>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Pickup</th>
-                <th>Category</th>
-                <th>Condition</th>
-                <th>Weight (kg)</th>
-                <th>Price (₹)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in items %}
-            <tr>
-                <td>{{ i.item_id }}</td>
-                <td>#{{ i.pickup_id }}</td>
-                <td>{{ i.category_name }}</td>
-                <td>{{ i.condition }}</td>
-                <td>{{ "%.2f"|format(i.actual_weight_kg|float) }}</td>
-                <td>{{ "%.2f"|format(i.calculated_price|float) }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<p><a href="{{ url_for('add_items') }}">+ Add New Item</a></p>
 
-    <div class="info-box">
-        <p>Source: <code>v_item_details</code></p>
-    </div>
-</div>
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Pickup ID</th>
+            <th>User</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Condition</th>
+            <th>Estimated (kg)</th>
+            <th>Actual (kg)</th>
+            <th>Hazard Level</th>
+            <th>Est. Value ($)</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.item_id }}</td>
+            <td>{{ item.pickup_id }}</td>
+            <td>{{ item.user_name }}</td>
+            <td>{{ item.category_name }}</td>
+            <td>{{ item.item_description }}</td>
+            <td>{{ item.condition }}</td>
+            <td>{{ "%.2f"|format(item.estimated_weight_kg or 0) }}</td>
+            <td>{{ "%.2f"|format(item.actual_weight_kg or 0) if item.actual_weight_kg else '-' }}</td>
+            <td>{{ item.hazard_level }}</td>
+            <td>{{ "%.2f"|format(item.estimated_value or 0) }}</td>
+            <td>{{ item.pickup_status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

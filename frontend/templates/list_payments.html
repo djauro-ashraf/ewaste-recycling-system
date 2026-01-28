@@ -3,36 +3,38 @@
 {% block title %}Payments{% endblock %}
 
 {% block content %}
-<div class="list-container">
-    <h1>Payments</h1>
+<h2>Payments</h2>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Pickup</th>
-                <th>User</th>
-                <th>Amount</th>
-                <th>Method</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in payments %}
-            <tr>
-                <td>{{ p.payment_id }}</td>
-                <td>#{{ p.pickup_id }}</td>
-                <td>{{ p.user_name }}</td>
-                <td>{{ "%.2f"|format(p.amount|float) }}</td>
-                <td>{{ p.payment_method }}</td>
-                <td>{{ p.payment_time }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<p><a href="{{ url_for('make_payment') }}">+ Process New Payment</a></p>
 
-    <div class="info-box">
-        <p>Source: <code>v_payment_summary</code></p>
-    </div>
-</div>
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Pickup ID</th>
+            <th>User</th>
+            <th>Amount ($)</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Transaction Ref</th>
+            <th>Processed At</th>
+            <th>Weight (kg)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for payment in payments %}
+        <tr>
+            <td>{{ payment.payment_id }}</td>
+            <td>{{ payment.pickup_id }}</td>
+            <td>{{ payment.user_name }}</td>
+            <td><strong>${{ "%.2f"|format(payment.amount) }}</strong></td>
+            <td>{{ payment.payment_method }}</td>
+            <td>{{ payment.payment_status }}</td>
+            <td>{{ payment.transaction_reference or '-' }}</td>
+            <td>{{ payment.processed_at }}</td>
+            <td>{{ "%.2f"|format(payment.total_weight_kg or 0) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

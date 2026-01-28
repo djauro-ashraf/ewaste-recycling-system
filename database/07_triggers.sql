@@ -1,5 +1,20 @@
 -- E-WASTE RECYCLING MANAGEMENT SYSTEM
--- 07_triggers.sql - Automation & Auditing Layer
+-- 07_triggers.sql - Automation & Auditing Layer (CORRECTED VERSION)
+
+DROP TRIGGER IF EXISTS update_pickup_timestamp ON pickup_requests;
+DROP TRIGGER IF EXISTS update_items_timestamp ON items;
+
+DROP TRIGGER IF EXISTS prevent_weight_change_after_payment ON items;
+
+DROP TRIGGER IF EXISTS audit_users_trigger ON users;
+DROP TRIGGER IF EXISTS audit_pickup_requests_trigger ON pickup_requests;
+DROP TRIGGER IF EXISTS audit_items_trigger ON items;
+DROP TRIGGER IF EXISTS audit_payments_trigger ON payments;
+
+
+DROP FUNCTION IF EXISTS set_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS prevent_weight_change_after_payment_fn() CASCADE;
+DROP FUNCTION IF EXISTS audit_log_trigger_fn() CASCADE;
 
 -- Trigger Function 1: Auto-update timestamp on record modification
 CREATE OR REPLACE FUNCTION update_timestamp()
@@ -16,38 +31,42 @@ CREATE TRIGGER trg_pickup_update_timestamp
     FOR EACH ROW
     EXECUTE FUNCTION update_timestamp();
 
--- Trigger Function 2: Audit log for important tables
-CREATE OR REPLACE FUNCTION audit_log_changes()
+-- Trigger Function 2: Audit log for pickup_requests table
+CREATE OR REPLACE FUNCTION audit_log_pickup_changes()
 RETURNS TRIGGER AS $$
 DECLARE
     v_old_values JSONB;
     v_new_values JSONB;
+    v_record_id INT;
 BEGIN
     IF TG_OP = 'DELETE' THEN
         v_old_values := to_jsonb(OLD);
         v_new_values := NULL;
+        v_record_id := OLD.pickup_id;
         
         INSERT INTO audit_log (table_name, operation, record_id, old_values, new_values, changed_by)
-        VALUES (TG_TABLE_NAME, TG_OP, (OLD.*)::text::jsonb->>'pickup_id', v_old_values, v_new_values, current_user);
+        VALUES (TG_TABLE_NAME, TG_OP, v_record_id, v_old_values, v_new_values, current_user);
         
         RETURN OLD;
     ELSIF TG_OP = 'UPDATE' THEN
         v_old_values := to_jsonb(OLD);
         v_new_values := to_jsonb(NEW);
+        v_record_id := NEW.pickup_id;
         
         -- Only log if something actually changed
         IF v_old_values IS DISTINCT FROM v_new_values THEN
             INSERT INTO audit_log (table_name, operation, record_id, old_values, new_values, changed_by)
-            VALUES (TG_TABLE_NAME, TG_OP, NEW.pickup_id, v_old_values, v_new_values, current_user);
+            VALUES (TG_TABLE_NAME, TG_OP, v_record_id, v_old_values, v_new_values, current_user);
         END IF;
         
         RETURN NEW;
     ELSIF TG_OP = 'INSERT' THEN
         v_old_values := NULL;
         v_new_values := to_jsonb(NEW);
+        v_record_id := NEW.pickup_id;
         
         INSERT INTO audit_log (table_name, operation, record_id, old_values, new_values, changed_by)
-        VALUES (TG_TABLE_NAME, TG_OP, NEW.pickup_id, v_old_values, v_new_values, current_user);
+        VALUES (TG_TABLE_NAME, TG_OP, v_record_id, v_old_values, v_new_values, current_user);
         
         RETURN NEW;
     END IF;
@@ -60,7 +79,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_audit_pickup_requests
     AFTER INSERT OR UPDATE OR DELETE ON pickup_requests
     FOR EACH ROW
-    EXECUTE FUNCTION audit_log_changes();
+    EXECUTE FUNCTION audit_log_pickup_changes();
 
 -- Trigger Function 3: Audit log for payments
 CREATE OR REPLACE FUNCTION audit_log_payments()
@@ -88,6 +107,8 @@ BEGIN
         VALUES (TG_TABLE_NAME, TG_OP, NEW.payment_id, v_new_values, current_user);
         RETURN NEW;
     END IF;
+    RETURN NULL;
+
 END;
 $$ LANGUAGE plpgsql;
 
@@ -163,6 +184,9 @@ CREATE TRIGGER trg_alert_hazard
     EXECUTE FUNCTION alert_high_hazard_items();
 
 -- Trigger Function 7: Auto-calculate pickup totals when items change
+-- NOTE: This is disabled by default because the procedures already handle this
+-- Uncomment if you want automatic recalculation on direct table modifications
+/*
 CREATE OR REPLACE FUNCTION recalculate_pickup_totals()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -194,6 +218,7 @@ CREATE TRIGGER trg_recalc_pickup_totals
     AFTER INSERT OR UPDATE OR DELETE ON items
     FOR EACH ROW
     EXECUTE FUNCTION recalculate_pickup_totals();
+*/
 
 -- Trigger Function 8: Update batch weight when items added/removed
 CREATE OR REPLACE FUNCTION update_batch_weight()
@@ -256,9 +281,10 @@ BEGIN
     v_usage_percent := (NEW.current_load_kg / NEW.capacity_kg) * 100;
     
     IF v_usage_percent >= 90 THEN
-        RAISE NOTICE 'CAPACITY WARNING: Facility % is at % capacity', NEW.facility_id, v_usage_percent;
+       RAISE NOTICE 'CAPACITY WARNING: Facility % is at %%% capacity', 
+             NEW.facility_id, 
+             ROUND(v_usage_percent, 2);
 
-        
         INSERT INTO audit_log (table_name, operation, record_id, new_values, changed_by)
         VALUES ('recycling_facilities', 'CAPACITY_WARNING', NEW.facility_id,
                 jsonb_build_object('usage_percent', v_usage_percent, 'current_load', NEW.current_load_kg),
@@ -339,4 +365,5 @@ CREATE TRIGGER trg_auto_batch_name
 -- 7. BEFORE triggers for validation, AFTER for logging
 -- 8. Triggers use JSONB for flexible audit storage
 -- 9. RAISE NOTICE for warnings, RAISE EXCEPTION for errors
--- 10. Triggers demonstrate advanced database automation
+-- 10. Fixed record_id extraction to use proper column names
+-- 11. Disabled auto-recalc trigger as procedures handle this

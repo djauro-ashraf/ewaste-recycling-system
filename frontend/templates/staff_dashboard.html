@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+<h2>Staff Dashboard</h2>
+
+<h3>Staff Workload</h3>
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Contact</th>
+            <th>Available</th>
+            <th>Vehicle</th>
+            <th>Total Pickups</th>
+            <th>Pending</th>
+            <th>Active</th>
+            <th>Completed</th>
+            <th>Current Load (kg)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in staff %}
+        <tr>
+            <td>{{ member.staff_id }}</td>
+            <td>{{ member.staff_name }}</td>
+            <td>{{ member.role }}</td>
+            <td>{{ member.contact_number }}</td>
+            <td>{{ 'Yes' if member.is_available else 'No' }}</td>
+            <td>{{ member.vehicle_number or '-' }}</td>
+            <td>{{ member.assigned_pickups }}</td>
+            <td>{{ member.pending_pickups }}</td>
+            <td>{{ member.active_pickups }}</td>
+            <td>{{ member.completed_pickups }}</td>
+            <td>{{ "%.2f"|format(member.current_load_kg or 0) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Assigned Pickups</h3>
+<p><a href="{{ url_for('assign_pickup') }}">+ Assign New Pickup</a></p>
+
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Pickup ID</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>Staff</th>
+            <th>Vehicle</th>
+            <th>Scheduled Time</th>
+            <th>Weight (kg)</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pickup in pickups %}
+        <tr>
+            <td>{{ pickup.pickup_id }}</td>
+            <td>{{ pickup.user_name }}</td>
+            <td><strong>{{ pickup.status }}</strong></td>
+            <td>{{ pickup.staff_name }}</td>
+            <td>{{ pickup.vehicle_number }}</td>
+            <td>{{ pickup.scheduled_time }}</td>
+            <td>{{ "%.2f"|format(pickup.total_weight_kg or 0) }}</td>
+            <td>{{ pickup.pickup_address }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

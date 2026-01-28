@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics{% endblock %}
+
+{% block content %}
+<h2>Reports & Analytics</h2>
+
+<h3>User Activity Summary</h3>
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>City</th>
+            <th>Total Pickups</th>
+            <th>Completed</th>
+            <th>Total Weight (kg)</th>
+            <th>Total Earnings ($)</th>
+            <th>Avg per Pickup ($)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in user_activity %}
+        <tr>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.city }}</td>
+            <td>{{ user.total_pickups }}</td>
+            <td>{{ user.completed_pickups }}</td>
+            <td>{{ "%.2f"|format(user.total_weight_recycled_kg or 0) }}</td>
+            <td>{{ "%.2f"|format(user.total_earnings or 0) }}</td>
+            <td>{{ "%.2f"|format((user.total_earnings / user.total_pickups) if user.total_pickups > 0 else 0) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Category Statistics</h3>
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Hazard Level</th>
+            <th>Base Price/kg ($)</th>
+            <th>Total Items</th>
+            <th>Total Weight (kg)</th>
+            <th>Avg Weight/Item (kg)</th>
+            <th>Total Value ($)</th>
+            <th>Recyclability (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cat in category_stats %}
+        <tr>
+            <td>{{ cat.category_name }}</td>
+            <td>{{ cat.hazard_level }}</td>
+            <td>{{ "%.2f"|format(cat.base_price_per_kg) }}</td>
+            <td>{{ cat.total_items }}</td>
+            <td>{{ "%.2f"|format(cat.total_weight_kg or 0) }}</td>
+            <td>{{ "%.2f"|format(cat.avg_weight_per_item_kg or 0) }}</td>
+            <td>{{ "%.2f"|format(cat.total_value or 0) }}</td>
+            <td>{{ "%.2f"|format(cat.recyclability_percentage) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Facility Capacity Status</h3>
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Facility</th>
+            <th>Location</th>
+            <th>Specialization</th>
+            <th>Capacity (kg)</th>
+            <th>Current Load (kg)</th>
+            <th>Available (kg)</th>
+            <th>Usage (%)</th>
+            <th>Operational</th>
+            <th>Total Batches</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for facility in facility_capacity %}
+        <tr>
+            <td>{{ facility.facility_name }}</td>
+            <td>{{ facility.location }}</td>
+            <td>{{ facility.specialization }}</td>
+            <td>{{ "%.0f"|format(facility.capacity_kg) }}</td>
+            <td>{{ "%.0f"|format(facility.current_load_kg) }}</td>
+            <td>{{ "%.0f"|format(facility.available_capacity_kg) }}</td>
+            <td><strong>{{ "%.1f"|format(facility.capacity_usage_percent) }}%</strong></td>
+            <td>{{ 'Yes' if facility.is_operational else 'No' }}</td>
+            <td>{{ facility.total_batches }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h3>Pickup Status Distribution</h3>
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Count</th>
+            <th>Total Weight (kg)</th>
+            <th>Total Amount ($)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for status in pickup_status %}
+        <tr>
+            <td><strong>{{ status.status }}</strong></td>
+            <td>{{ status.count }}</td>
+            <td>{{ "%.2f"|format(status.total_weight or 0) }}</td>
+            <td>{{ "%.2f"|format(status.total_amount or 0) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

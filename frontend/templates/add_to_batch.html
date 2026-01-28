@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Add Items to Batch{% endblock %}
+
+{% block content %}
+<h2>Add Items to Batch: {{ batch.batch_name }}</h2>
+
+<p><strong>Facility:</strong> {{ batch.facility_name }}</p>
+<p><strong>Current Weight:</strong> {{ "%.2f"|format(batch.total_weight_kg or 0) }} kg</p>
+<p><strong>Current Items:</strong> {{ batch.item_count }}</p>
+
+<form method="POST" action="{{ url_for('add_to_batch', batch_id=batch.batch_id) }}">
+    <table>
+        <tr>
+            <td><label for="item_id">Select Item:</label></td>
+            <td>
+                <select name="item_id" id="item_id" required>
+                    <option value="">-- Select Item --</option>
+                    {% for item in items %}
+                    <option value="{{ item.item_id }}">
+                        Item #{{ item.item_id }} - {{ item.item_description }} ({{ item.category_name }}) - {{ "%.2f"|format(item.weight) }}kg - User: {{ item.full_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit">Add Item to Batch</button>
+                <a href="{{ url_for('list_batches') }}">Back to Batches</a>
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock %}

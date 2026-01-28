@@ -172,7 +172,7 @@ CREATE TABLE batch_items (
 CREATE TABLE audit_log (
     log_id SERIAL PRIMARY KEY,
     table_name VARCHAR(50) NOT NULL,
-    operation VARCHAR(10) NOT NULL, -- INSERT, UPDATE, DELETE
+    operation VARCHAR(30) NOT NULL, -- INSERT, UPDATE, DELETE
     record_id INT NOT NULL,
     old_values JSONB,
     new_values JSONB,

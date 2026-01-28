@@ -3,55 +3,39 @@
 {% block title %}Create Pickup Request{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h1>Create Pickup Request</h1>
-    
-    <form method="POST" action="/create-pickup">
-        <div class="form-group">
-            <label for="user_id">Select User:</label>
-            <select name="user_id" id="user_id" required>
-                <option value="">-- Choose User --</option>
-                {% for user in users %}
-                <option value="{{ user.user_id }}">{{ user.full_name }} ({{ user.email }})</option>
-                {% endfor %}
-            </select>
-        </div>
+<h2>Create New Pickup Request</h2>
 
-        <div class="form-group">
-            <label for="preferred_date">Preferred Pickup Date:</label>
-            <input type="date" name="preferred_date" id="preferred_date" required 
-                   min="{{ (now() + timedelta(days=1)).strftime('%Y-%m-%d') }}">
-        </div>
-
-        <div class="form-group">
-            <label for="address">Pickup Address:</label>
-            <textarea name="address" id="address" rows="3" required 
-                      placeholder="Enter complete address with landmarks"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="notes">Notes (optional):</label>
-            <textarea name="notes" id="notes" rows="2" 
-                      placeholder="Any special instructions or item details"></textarea>
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Create Pickup Request</button>
-            <a href="/" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
-
-    <div class="info-box">
-        <h3>ℹ️ How It Works</h3>
-        <p>This form calls the <code>create_pickup_request()</code> stored procedure which:</p>
-        <ul>
-            <li>Validates the user exists and is active</li>
-            <li>Ensures the date is not in the past</li>
-            <li>Creates a pickup request with status 'pending'</li>
-            <li>Returns the new pickup_id</li>
-            <li>Automatically timestamps the request</li>
-        </ul>
-        <p>After creating the request, you can add items to it.</p>
-    </div>
-</div>
+<form method="POST" action="{{ url_for('create_pickup') }}">
+    <table>
+        <tr>
+            <td><label for="user_id">User:</label></td>
+            <td>
+                <select name="user_id" id="user_id" required>
+                    <option value="">-- Select User --</option>
+                    {% for user in users %}
+                    <option value="{{ user.user_id }}">{{ user.full_name }} ({{ user.email }})</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="preferred_date">Preferred Date:</label></td>
+            <td><input type="date" name="preferred_date" id="preferred_date" required></td>
+        </tr>
+        <tr>
+            <td><label for="address">Pickup Address:</label></td>
+            <td><textarea name="address" id="address" rows="3" required></textarea></td>
+        </tr>
+        <tr>
+            <td><label for="notes">Notes:</label></td>
+            <td><textarea name="notes" id="notes" rows="2"></textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit">Create Pickup Request</button>
+                <a href="{{ url_for('list_pickups') }}">Cancel</a>
+            </td>
+        </tr>
+    </table>
+</form>
 {% endblock %}

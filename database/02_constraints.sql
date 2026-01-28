@@ -206,8 +206,17 @@ ALTER TABLE recycling_batches
 
 -- Audit Log
 ALTER TABLE audit_log
-    ADD CONSTRAINT chk_audit_operation
-    CHECK (operation IN ('INSERT', 'UPDATE', 'DELETE'));
+ADD CONSTRAINT chk_audit_operation
+CHECK (
+    operation IN (
+        'INSERT', 'UPDATE', 'DELETE',
+        'CREATE_PICKUP', 'ADD_ITEM', 'ASSIGN_PICKUP',
+        'COLLECT_PICKUP', 'PROCESS_PAYMENT',
+        'CREATE_BATCH', 'ADD_TO_BATCH', 'START_BATCH', 'COMPLETE_BATCH',
+        'STATUS_CHANGE', 'WEIGHT_RECORDED', 'SYSTEM', 'HAZARD_ALERT'
+    )
+);
+
 
 -- UNIQUE Constraints (Beyond Primary Keys)
 

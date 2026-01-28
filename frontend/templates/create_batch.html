@@ -3,36 +3,38 @@
 {% block title %}Create Batch{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h1>Create Recycling Batch</h1>
+<h2>Create Recycling Batch</h2>
 
-    <form method="POST">
-        <div class="form-group">
-            <label>Facility:</label>
-            <select name="facility_id" required>
-                {% for f in facilities %}
-                <option value="{{ f.facility_id }}">
-                    {{ f.facility_name }} ({{ f.location }})
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Batch Name:</label>
-            <input type="text" name="batch_name" required>
-        </div>
-
-        <div class="form-group">
-            <label>Notes:</label>
-            <textarea name="notes"></textarea>
-        </div>
-
-        <button class="btn btn-primary">Create Batch</button>
-    </form>
-
-    <div class="info-box">
-        <p>Calls <code>create_recycling_batch()</code>.</p>
-    </div>
-</div>
+<form method="POST" action="{{ url_for('create_batch') }}">
+    <table>
+        <tr>
+            <td><label for="facility_id">Recycling Facility:</label></td>
+            <td>
+                <select name="facility_id" id="facility_id" required>
+                    <option value="">-- Select Facility --</option>
+                    {% for facility in facilities %}
+                    <option value="{{ facility.facility_id }}">
+                        {{ facility.facility_name }} - {{ facility.location }} 
+                        ({{ facility.specialization }}, {{ "%.0f"|format(facility.capacity_kg - facility.current_load_kg) }}kg available)
+                    </option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="batch_name">Batch Name:</label></td>
+            <td><input type="text" name="batch_name" id="batch_name" required></td>
+        </tr>
+        <tr>
+            <td><label for="notes">Notes:</label></td>
+            <td><textarea name="notes" id="notes" rows="3"></textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit">Create Batch</button>
+                <a href="{{ url_for('list_batches') }}">Cancel</a>
+            </td>
+        </tr>
+    </table>
+</form>
 {% endblock %}

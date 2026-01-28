@@ -1,75 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - E-Waste System{% endblock %}
 
 {% block content %}
-<div class="dashboard">
-    <h1>System Dashboard</h1>
-    
-    {% if error %}
-    <div class="alert error">{{ error }}</div>
-    {% endif %}
+<h2>System Dashboard</h2>
 
-    {% if stats %}
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Active Users</h3>
-            <p class="stat-number">{{ stats.active_users }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Pending Pickups</h3>
-            <p class="stat-number">{{ stats.pending_pickups }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Completed Pickups</h3>
-            <p class="stat-number">{{ stats.completed_pickups }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Total Weight Recycled</h3>
-            <p class="stat-number">{{ "%.2f"|format(stats.total_weight|float) }} kg</p>
-        </div>
-        <div class="stat-card">
-            <h3>Open Batches</h3>
-            <p class="stat-number">{{ stats.open_batches }}</p>
-        </div>
+<div class="stats">
+    <div class="stat-box">
+        <h3>{{ stats.active_users }}</h3>
+        <p>Active Users</p>
     </div>
-    {% endif %}
-
-    <div class="quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="action-buttons">
-            <a href="/create-pickup" class="btn btn-primary">Create Pickup Request</a>
-            <a href="/add-items" class="btn btn-secondary">Add Items</a>
-            <a href="/assign-pickup" class="btn btn-secondary">Assign Pickup</a>
-            <a href="/make-payment" class="btn btn-success">Process Payment</a>
-            <a href="/create-batch" class="btn btn-secondary">Create Batch</a>
-            <a href="/reports" class="btn btn-info">View Reports</a>
-        </div>
+    <div class="stat-box">
+        <h3>{{ stats.pending_pickups }}</h3>
+        <p>Pending Pickups</p>
     </div>
-
-    <div class="info-box">
-        <h2>About This System</h2>
-        <p><strong>Database-Driven Architecture:</strong></p>
-        <ul>
-            <li>All business logic resides in PostgreSQL database</li>
-            <li>Stored procedures handle complete workflows</li>
-            <li>Triggers automatically log changes and enforce rules</li>
-            <li>Views provide pre-built reports and summaries</li>
-            <li>Backend only forwards requests to database</li>
-            <li>Frontend only displays database results</li>
-        </ul>
-        <p><strong>Key Features:</strong></p>
-        <ul>
-            <li>Pickup request management with automated assignment</li>
-            <li>Item tracking with weight verification at multiple stages</li>
-            <li>Dynamic pricing based on category and weight</li>
-            <li>Automated payment processing</li>
-            <li>Recycling batch creation and tracking</li>
-            <li>Staff workload monitoring</li>
-            <li>Facility capacity management</li>
-            <li>Comprehensive audit logging</li>
-            <li>Advanced analytics and reporting</li>
-        </ul>
+    <div class="stat-box">
+        <h3>{{ stats.completed_pickups }}</h3>
+        <p>Completed Pickups</p>
+    </div>
+    <div class="stat-box">
+        <h3>{{ "%.2f"|format(stats.total_weight) }} kg</h3>
+        <p>Total Weight Recycled</p>
+    </div>
+    <div class="stat-box">
+        <h3>{{ stats.open_batches }}</h3>
+        <p>Open Batches</p>
     </div>
 </div>
+
+<h3>Quick Actions</h3>
+<ul>
+    <li><a href="{{ url_for('create_pickup') }}">Create New Pickup Request</a></li>
+    <li><a href="{{ url_for('add_items') }}">Add Items to Pickup</a></li>
+    <li><a href="{{ url_for('assign_pickup') }}">Assign Pickup to Staff</a></li>
+    <li><a href="{{ url_for('make_payment') }}">Process Payment</a></li>
+    <li><a href="{{ url_for('create_batch') }}">Create Recycling Batch</a></li>
+</ul>
 {% endblock %}

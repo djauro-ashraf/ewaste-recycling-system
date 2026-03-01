@@ -28,7 +28,7 @@ CREATE TABLE users (
     is_active BOOLEAN DEFAULT TRUE
 );
 
--- Recycling Facilities
+-- Recycling Facilities 
 CREATE TABLE recycling_facilities (
     facility_id SERIAL PRIMARY KEY,
     facility_name VARCHAR(100) NOT NULL,

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Pickups — Supervisor{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">My Pickups</h1></div>
+<div class="filter-bar">
+  {% for s in ['','supervisor_assigned','field_assigned','picked_up','delivered','collected','completed'] %}
+  <a href="?status={{ s }}" class="filter-chip {% if status_filter == s %}active{% endif %}">
+    {{ s.replace('_',' ').title() if s else 'All' }}
+  </a>
+  {% endfor %}
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>#</th><th>User</th><th>Address</th><th>Date</th><th>Status</th><th>Collector</th><th>Driver</th><th>Amount</th></tr></thead>
+    <tbody>
+    {% for p in pickups %}
+    <tr {% if p.payment_overdue %}class="row-warn"{% endif %}>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td>{{ p.user_name }}</td>
+      <td class="text-dim font-xs">{{ p.pickup_address[:35] }}…</td>
+      <td class="mono text-dim">{{ p.preferred_date }}</td>
+      <td>
+        <span class="badge badge-{{ p.status }}">{{ p.status.replace('_',' ') }}</span>
+        {% if p.payment_overdue %}<span class="badge badge-cancelled" style="margin-left:4px">OVERDUE</span>{% endif %}
+      </td>
+      <td class="text-dim font-xs">
+        {{ p.collector_name or '—' }}
+        {% if p.collector_confirmed %}<span class="text-green"> ✓</span>{% endif %}
+      </td>
+      <td class="text-dim font-xs">
+        {{ p.driver_name or '—' }}
+        {% if p.driver_confirmed %}<span class="text-green"> ✓</span>{% endif %}
+      </td>
+      <td class="mono">{% if p.total_amount is not none and p.total_amount > 0 %}৳{{ p.total_amount }}{% else %}—{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="empty-cell">No pickups.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

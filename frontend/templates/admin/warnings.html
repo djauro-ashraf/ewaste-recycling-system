@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Warnings — Admin{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Warnings</h1></div>
+<div class="grid-2">
+  <div class="card" style="padding:16px">
+    <div class="card-header">Issue Warning</div>
+    <form method="POST" style="padding-top:14px">
+      <div class="form-group">
+        <label class="form-label">Target Type</label>
+        <select name="target_type" class="form-select" id="targetType" onchange="updateList()" required>
+          <option value="">— select —</option>
+          <option value="user" {% if request.args.get('target_type')=='user' %}selected{% endif %}>User</option>
+          <option value="staff" {% if request.args.get('target_type')=='staff' %}selected{% endif %}>Staff</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Person</label>
+        <select name="target_id" class="form-select" id="targetId" required><option value="">— select type first —</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Severity</label>
+        <select name="severity" class="form-select" required>
+          <option value="notice">Notice</option>
+          <option value="warning" selected>Warning</option>
+          <option value="final_warning">Final Warning</option>
+          <option value="suspension">Suspension (locks account)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea name="message" class="form-textarea" rows="4" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-warn w-full">Issue Warning</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-header">Recent Warnings</div>
+    {% for w in warnings %}
+    <div class="warning-row">
+      <div class="warning-head">
+        <span class="badge badge-sev-{{ w.severity }}">{{ w.severity.replace('_',' ').upper() }}</span>
+        <span class="fw6">{% if w.target_type=='user' %}{{ w.target_user_name }}{% else %}{{ w.target_staff_name }} ({{ w.target_sub_role }}){% endif %}</span>
+        <span class="mono text-dim font-xs">{{ w.issued_at.strftime('%d %b %Y') if w.issued_at else '—' }}</span>
+      </div>
+      <div class="text-dim font-sm">{{ w.message }}</div>
+    </div>
+    {% else %}
+    <div class="empty-state-sm">No warnings issued.</div>
+    {% endfor %}
+  </div>
+</div>
+<script>
+var users={{ users_json|tojson }};
+var staffs={{ staff_json|tojson }};
+function updateList(){var t=document.getElementById('targetType').value;var s=document.getElementById('targetId');s.innerHTML='<option value="">— select —</option>';(t==='user'?users:t==='staff'?staffs:[]).forEach(function(i){var o=document.createElement('option');o.value=i.id;o.text=i.name;if(i.id=={{ request.args.get('target_id',0) }})o.selected=true;s.appendChild(o);});}
+window.onload=function(){var t='{{ request.args.get("target_type","") }}';if(t){document.getElementById('targetType').value=t;updateList();}};
+</script>
+{% endblock %}

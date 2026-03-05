@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}New Pickup{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{{ url_for('user_pickups') }}" class="back-link">← My Pickups</a>
+  <h1 class="page-title">Request Pickup</h1>
+</div>
+<div class="card" style="max-width:540px;padding:24px">
+  <form method="POST">
+    <div class="form-group">
+      <label class="form-label">Preferred Date</label>
+      <input name="preferred_date" type="date" class="form-input" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Pickup Address</label>
+      <textarea name="address" class="form-textarea" rows="3" placeholder="Enter your full pickup address" required></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea name="notes" class="form-textarea" rows="2" placeholder="Any special instructions for collection..."></textarea>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:16px">
+      <p style="font-size:13px;color:var(--silver);margin-bottom:4px">
+        <strong>📦 Adding Items</strong>
+      </p>
+      <p style="font-size:12px;color:var(--text-dim)">
+        After submitting this request, you can add your e-waste items (phones, laptops, batteries, etc.) from the pickup detail page.
+      </p>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-full">Submit Pickup Request</button>
+  </form>
+</div>
+{% endblock %}

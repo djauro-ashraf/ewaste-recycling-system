@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}History — Supervisor{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">My History</h1></div>
+
+<div class="card">
+  <div class="card-header">Pickup History <span class="badge-count-yellow">{{ pickups|length }}</span></div>
+  <table class="tbl">
+    <thead><tr><th>#</th><th>User</th><th>Address</th><th>Collected</th><th>Weight</th><th>Amount</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for p in pickups %}
+    <tr>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td class="fw6">{{ p.user_name }}</td>
+      <td class="text-dim font-xs">{{ p.pickup_address[:40] }}…</td>
+      <td class="mono text-dim">{{ p.collected_at.strftime('%d %b %Y') if p.collected_at else '—' }}</td>
+      <td class="mono">{{ p.total_weight_kg or '—' }} kg</td>
+      <td class="mono">{% if p.total_amount is not none %}৳{{ p.total_amount }}{% else %}—{% endif %}</td>
+      <td><span class="badge badge-{{ p.status }}">{{ p.status.replace('_',' ') }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="empty-cell">No pickup history yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card" style="margin-top:20px">
+  <div class="card-header">Payment History <span class="badge-count-yellow">{{ payments|length }}</span></div>
+  <table class="tbl">
+    <thead><tr><th>#</th><th>Pickup</th><th>User</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+    <tbody>
+    {% for py in payments %}
+    <tr>
+      <td class="mono text-dim">{{ py.payment_id }}</td>
+      <td class="mono">#{{ py.pickup_id }}</td>
+      <td>{{ py.user_name }}</td>
+      <td class="mono text-green">৳{{ '%.2f'|format(py.amount|float) }}</td>
+      <td class="text-dim">{{ py.payment_method }}</td>
+      <td class="mono text-dim">{{ py.processed_at.strftime('%d %b %Y') if py.processed_at else '—' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty-cell">No payment history yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

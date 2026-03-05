@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Staff — Admin{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Staff Management</h1></div>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('supervisors',this)">Supervisors ({{ supervisors|length }})</button>
+  <button class="tab-btn" onclick="showTab('field',this)">Field Staff ({{ all_staff|selectattr('sub_role','ne','supervisor')|list|length }})</button>
+  <button class="tab-btn" onclick="showTab('create',this)">+ Add Staff</button>
+</div>
+
+<!-- SUPERVISORS TAB -->
+<div id="tab-supervisors">
+  {% for s in supervisors %}
+  <div class="supervisor-card">
+    <div class="sup-header">
+      <div>
+        <span class="sup-name">{{ s.supervisor_name }}</span>
+        <span class="badge badge-{{ 'active' if s.supervisor_active else 'cancelled' }}">{{ 'Active' if s.supervisor_active else 'Inactive' }}</span>
+      </div>
+      <div class="sup-stats">
+        <span class="mono text-dim">{{ s.driver_count }} drivers · {{ s.collector_count }} collectors · {{ s.vehicle_count }} vehicles</span>
+        {% if s.supervisor_active %}
+        <form method="POST" action="{{ url_for('admin_fire_staff', sid=s.supervisor_id) }}" style="display:inline" onsubmit="return confirm('Fire {{ s.supervisor_name }}?')">
+          <input type="hidden" name="reason" value="Admin action">
+          <button class="btn btn-xs btn-danger">Fire</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% set team = all_staff | selectattr('supervisor_id', 'equalto', s.supervisor_id) | list %}
+    {% if team %}
+    <div class="sup-team">
+      <table class="tbl tbl-compact">
+        <thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Warnings</th><th></th></tr></thead>
+        <tbody>
+        {% for m in team %}
+        <tr>
+          <td>{{ m.full_name }}</td>
+          <td><span class="badge badge-subrole-{{ m.sub_role }}">{{ m.sub_role }}</span></td>
+          <td><span class="badge badge-{{ 'active' if m.is_active else 'cancelled' }}">{{ 'Active' if m.is_active else 'Fired' }}</span></td>
+          <td class="mono {% if m.warning_count > 0 %}text-yellow{% endif %}">{{ m.warning_count }}</td>
+          <td>
+            {% if m.is_active %}
+            <form method="POST" action="{{ url_for('admin_fire_staff', sid=m.staff_id) }}" onsubmit="return confirm('Fire {{ m.full_name }}?')">
+              <input type="hidden" name="reason" value="Admin action">
+              <button class="btn btn-xs btn-danger">Fire</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-dim" style="padding:10px 14px;font-size:13px">No field staff assigned yet.</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="empty-state">No supervisors found.</div>
+  {% endfor %}
+</div>
+
+<!-- FIELD STAFF TAB -->
+<div id="tab-field" style="display:none">
+  <table class="tbl">
+    <thead><tr><th>Name</th><th>Role</th><th>Supervisor</th><th>Status</th><th>Available</th><th>Warnings</th><th></th></tr></thead>
+    <tbody>
+    {% for m in all_staff %}
+    {% if m.sub_role != 'supervisor' %}
+    <tr>
+      <td>{{ m.full_name }}</td>
+      <td><span class="badge badge-subrole-{{ m.sub_role }}">{{ m.sub_role }}</span></td>
+      <td class="text-dim">
+        {% for s in supervisors %}{% if s.supervisor_id == m.supervisor_id %}{{ s.supervisor_name }}{% endif %}{% endfor %}
+      </td>
+      <td><span class="badge badge-{{ 'active' if m.is_active else 'cancelled' }}">{{ 'Active' if m.is_active else 'Fired' }}</span></td>
+      <td class="mono">{{ 'Yes' if m.is_available else 'No' }}</td>
+      <td class="mono {% if m.warning_count > 0 %}text-yellow{% endif %}">{{ m.warning_count }}</td>
+      <td>
+        {% if m.is_active %}
+        <form method="POST" action="{{ url_for('admin_fire_staff', sid=m.staff_id) }}" onsubmit="return confirm('Fire {{ m.full_name }}?')">
+          <input type="hidden" name="reason" value="Admin action">
+          <button class="btn btn-xs btn-danger">Fire</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endif %}
+    {% else %}
+    <tr><td colspan="7" class="empty-cell">No field staff found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- CREATE STAFF TAB -->
+<div id="tab-create" style="display:none">
+  <div class="card" style="max-width:480px;padding:24px">
+    <h3 style="margin-bottom:16px">Add New Staff Member</h3>
+    <form method="POST" action="{{ url_for('admin_create_staff') }}">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input name="full_name" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select name="sub_role" class="form-select" required id="roleSelect" onchange="toggleSup()">
+          <option value="">— select —</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="driver">Driver</option>
+          <option value="collector">Collector</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Number</label>
+        <input name="contact_number" class="form-input" required>
+      </div>
+      <div class="form-group" id="supField" style="display:none">
+        <label class="form-label">Assign to Supervisor</label>
+        <select name="supervisor_id" class="form-select">
+          <option value="">— none —</option>
+          {% for s in supervisors %}<option value="{{ s.supervisor_id }}">{{ s.supervisor_name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input name="username" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input name="password" type="password" class="form-input" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function showTab(n,b){document.querySelectorAll('[id^="tab-"]').forEach(e=>e.style.display='none');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+n).style.display='block';b.classList.add('active');}
+function toggleSup(){var r=document.getElementById('roleSelect').value;document.getElementById('supField').style.display=(r==='driver'||r==='collector')?'block':'none';}
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Batches — Admin{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Recycling Batches</h1></div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Batch</th><th>Facility</th><th>Supervisor</th><th>Status</th><th>Pickups</th><th>Items</th><th>Weight</th><th>Revenue</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for b in batches %}
+    <tr>
+      <td class="mono fw6">{{ b.batch_name }}</td>
+      <td class="text-dim">{{ b.facility_name }}</td>
+      <td class="text-dim">{{ b.supervisor_name or '—' }}</td>
+      <td><span class="badge badge-batch-{{ b.status }}">{{ b.status }}</span></td>
+      <td class="mono">{{ b.pickup_count }}</td>
+      <td class="mono">{{ b.item_count }}</td>
+      <td class="mono">{{ '%.2f'|format(b.live_weight_kg|float) }} kg</td>
+      <td class="mono {% if b.recorded_revenue %}text-green{% else %}text-dim{% endif %}">{% if b.recorded_revenue %}৳{{ '{:,.0f}'.format(b.recorded_revenue) }}{% else %}—{% endif %}</td>
+      <td>
+        {% if b.status == 'open' and b.pickup_count >= 2 %}
+        <form method="POST" action="{{ url_for('admin_force_process_batch', bid=b.batch_id) }}">
+          <button class="btn btn-xs btn-ghost">Force Process</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="empty-cell">No batches yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

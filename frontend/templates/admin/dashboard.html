@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">System Dashboard</h1>
+  <span class="page-sub">Full operational overview</span>
+</div>
+{% if alerts %}
+<div class="alert-banner">
+  <div class="alert-banner-icon">⚠</div>
+  <div class="alert-banner-text"><strong>{{ alerts|length }} unresolved alert(s)</strong> require attention.</div>
+  <a href="{{ url_for('admin_alerts') }}" class="btn btn-sm btn-warn">View Alerts</a>
+</div>
+{% endif %}
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Pending Pickups</div>
+    <div class="stat-value {% if stats.pending > 0 %}text-warn{% endif %}">{{ stats.pending }}</div>
+    <div class="stat-sub">Awaiting supervisor</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">In Progress</div>
+    <div class="stat-value text-blue">{{ (stats.sup_assigned or 0) + (stats.field_assigned or 0) }}</div>
+    <div class="stat-sub">{{ stats.sup_assigned }} sup · {{ stats.field_assigned }} field</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Awaiting Payment</div>
+    <div class="stat-value {% if stats.collected > 0 %}text-yellow{% endif %}">{{ stats.collected }}</div>
+    <div class="stat-sub">Collected, not paid</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Completed Total</div>
+    <div class="stat-value text-green">{{ stats.completed }}</div>
+    <div class="stat-sub">All-time paid pickups</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Active Users</div>
+    <div class="stat-value">{{ stats.total_users }}</div>
+    <div class="stat-sub">Registered citizens</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Active Staff</div>
+    <div class="stat-value">{{ (stats.supervisors or 0) + (stats.drivers or 0) + (stats.collectors or 0) }}</div>
+    <div class="stat-sub">{{ stats.supervisors }} sup · {{ stats.drivers }} drv · {{ stats.collectors }} col</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Paid Out</div>
+    <div class="stat-value text-green">৳{{ '{:,.0f}'.format(stats.total_paid or 0) }}</div>
+    <div class="stat-sub">Lifetime user payments</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">System Revenue</div>
+    <div class="stat-value text-silver">৳{{ '{:,.0f}'.format(stats.total_revenue or 0) }}</div>
+    <div class="stat-sub">From recycled materials</div>
+  </div>
+</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Recent Pickups</div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>User</th><th>Status</th><th>Date</th><th>Supervisor</th></tr></thead>
+      <tbody>
+      {% for p in recent_pickups %}
+      <tr>
+        <td class="mono">#{{ p.pickup_id }}</td>
+        <td>{{ p.user_name }}</td>
+        <td><span class="badge badge-{{ p.status }}">{{ p.status.replace('_',' ') }}</span></td>
+        <td class="mono text-dim">{{ p.preferred_date }}</td>
+        <td class="text-dim">{{ p.supervisor_name or '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-cell">No pickups yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="card-footer"><a href="{{ url_for('admin_pickups') }}" class="link-more">View all →</a></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Active Alerts {% if alerts %}<span class="badge-count-red">{{ alerts|length }}</span>{% endif %}</div>
+    {% for a in alerts[:5] %}
+    <div class="alert-row sev-{{ a.severity }}">
+      <div class="alert-row-title">{{ a.title }}</div>
+      <div class="alert-row-desc">{{ a.description }}</div>
+      <div class="alert-row-time">{{ a.created_at.strftime('%d %b %H:%M') if a.created_at else '—' }}</div>
+    </div>
+    {% else %}
+    <div class="empty-state-sm">All clear — no active alerts.</div>
+    {% endfor %}
+  </div>
+</div>
+<div class="grid-2" style="margin-top:20px">
+  <div class="card">
+    <div class="card-header">Supervisor Overview</div>
+    <table class="tbl">
+      <thead><tr><th>Supervisor</th><th>Team</th><th>Pending Pay</th><th>Paid Out</th></tr></thead>
+      <tbody>
+      {% for s in supervisors %}
+      <tr>
+        <td class="fw6">{{ s.supervisor_name }}</td>
+        <td class="mono text-dim">{{ s.driver_count }}D · {{ s.collector_count }}C</td>
+        <td class="mono {% if s.pending_payment > 0 %}text-yellow{% endif %}">{{ s.pending_payment }}</td>
+        <td class="mono">৳{{ '{:,.0f}'.format(s.total_paid_out or 0) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-cell">No supervisors.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-header">Overdue Payments</div>
+    <table class="tbl">
+      <thead><tr><th>Pickup</th><th>User</th><th>Overdue</th><th>Requests</th></tr></thead>
+      <tbody>
+      {% for p in overdue %}
+      <tr class="row-warn">
+        <td class="mono">#{{ p.pickup_id }}</td>
+        <td>{{ p.user_name }}</td>
+        <td class="mono text-red">{{ p.hours_overdue|int }}h</td>
+        <td class="mono {% if p.payment_request_count > 1 %}text-red fw6{% endif %}">{{ p.payment_request_count }}x</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-cell text-green">No overdue payments.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

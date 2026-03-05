@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Collection History{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Collection History</h1></div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>#</th><th>User</th><th>Date</th><th>Weight</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for p in history %}
+    <tr>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td>{{ p.user_name }}</td>
+      <td class="mono text-dim">{{ p.collected_at.strftime('%d %b %Y') if p.collected_at else p.preferred_date }}</td>
+      <td class="mono">{{ p.total_weight_kg or '—' }} kg</td>
+      <td><span class="badge badge-{{ p.status }}">{{ p.status.replace('_',' ') }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="empty-cell">No history yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

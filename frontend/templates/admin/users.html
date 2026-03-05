@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Users — Admin{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">User Accounts</h1></div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>City</th><th>Status</th><th>Pickups</th><th>Earned</th><th>Warnings</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+    <tr class="{% if u.user_status == 'suspended' %}row-danger{% elif u.user_status == 'idle' %}row-dim{% endif %}">
+      <td class="mono text-dim">{{ u.user_id }}</td>
+      <td class="fw6">{{ u.full_name }}<br><span class="mono text-dim font-xs">{{ u.username }}</span></td>
+      <td class="text-dim font-xs">{{ u.email }}</td>
+      <td class="text-dim">{{ u.city }}</td>
+      <td><span class="badge badge-ustatus-{{ u.user_status }}">{{ u.user_status }}</span></td>
+      <td class="mono">{{ u.total_pickups }}/{{ u.completed_pickups }}</td>
+      <td class="mono">৳{{ '{:,.0f}'.format(u.total_earnings or 0) }}</td>
+      <td class="mono {% if u.warning_count > 0 %}text-yellow{% endif %}">{{ u.warning_count }}</td>
+      <td class="flex-actions">
+        <form method="POST" action="{{ url_for('admin_toggle_user', uid=u.user_id) }}" style="display:inline">
+          <button class="btn btn-xs btn-ghost">{{ 'Unlock' if not u.is_active else 'Lock' }}</button>
+        </form>
+        <a href="{{ url_for('admin_warnings') }}?target_type=user&target_id={{ u.user_id }}" class="btn btn-xs btn-warn">Warn</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="empty-cell">No users.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

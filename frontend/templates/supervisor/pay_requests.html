@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Payment Requests — Supervisor{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Payment Requests</h1></div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Req #</th><th>Pickup</th><th>User</th><th>Requested</th><th>Duplicate?</th><th>Amount</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for r in requests %}
+    <tr {% if r.is_duplicate %}class="row-danger"{% endif %}>
+      <td class="mono">#{{ r.request_id }}</td>
+      <td class="mono">#{{ r.pickup_id }}</td>
+      <td class="fw6">{{ r.user_name }}</td>
+      <td class="mono text-dim">{{ r.requested_at.strftime('%d %b %H:%M') if r.requested_at else '—' }}</td>
+      <td>{% if r.is_duplicate %}<span class="badge badge-cancelled">DUPLICATE ⚠</span>{% else %}<span class="badge badge-active">First</span>{% endif %}</td>
+      <td class="mono">৳{{ r.total_amount }}</td>
+      <td>
+        {% if r.pickup_status == 'collected' %}
+        <a href="{{ url_for('sup_payments') }}?focus={{ r.pickup_id }}" class="btn btn-sm btn-green">Pay Now</a>
+        {% elif r.pickup_status == 'completed' %}
+        <span class="badge badge-active">Paid</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="empty-cell">No payment requests.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

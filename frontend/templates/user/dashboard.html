@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">My Dashboard</h1>
+  <span class="page-sub">Welcome back, {{ current_user.full_name }}</span>
+</div>
+{% if warnings %}
+<div class="alert-banner" style="border-color:var(--red);background:#2e1a1a">
+  <div class="alert-banner-icon" style="color:var(--red)">⚠</div>
+  <div class="alert-banner-text">You have <strong>{{ warnings|length }} warning(s)</strong> from the administrator.</div>
+</div>
+{% endif %}
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Pending</div>
+    <div class="stat-value text-yellow">{{ stats.pending_count or 0 }}</div>
+    <div class="stat-sub">Awaiting collection</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Assigned</div>
+    <div class="stat-value text-blue">{{ stats.assigned_count or 0 }}</div>
+    <div class="stat-sub">Team dispatched</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Collected</div>
+    <div class="stat-value text-warn">{{ stats.collected_count or 0 }}</div>
+    <div class="stat-sub">Awaiting payment</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Completed</div>
+    <div class="stat-value text-green">{{ stats.completed_count or 0 }}</div>
+    <div class="stat-sub">৳{{ '{:,.0f}'.format(stats.total_earned or 0) }} earned</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header">Recent Pickups</div>
+  <table class="tbl">
+    <thead><tr><th>#</th><th>Date</th><th>Status</th><th>Weight</th><th>Amount</th><th></th></tr></thead>
+    <tbody>
+    {% for p in recent %}
+    <tr>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td class="mono text-dim">{{ p.preferred_date }}</td>
+      <td><span class="badge badge-{{ p.status }}">{{ p.status.replace('_',' ') }}</span></td>
+      <td class="mono">{{ p.total_weight_kg or '—' }} kg</td>
+      <td class="mono">{% if p.total_amount is not none %}৳{{ p.total_amount }}{% else %}—{% endif %}</td>
+      <td><a href="{{ url_for('user_pickup_detail', pid=p.pickup_id) }}" class="btn btn-xs btn-ghost">View</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty-cell">No pickups yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="card-footer">
+    <a href="{{ url_for('user_new_pickup') }}" class="btn btn-primary btn-sm">+ New Pickup</a>
+    <a href="{{ url_for('user_pickups') }}" class="link-more" style="margin-left:12px">View all →</a>
+  </div>
+</div>
+{% endblock %}

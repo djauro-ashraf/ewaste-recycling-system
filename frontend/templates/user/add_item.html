@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Add Item — Pickup #{{ pickup.pickup_id }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{{ url_for('user_pickup_detail', pid=pickup.pickup_id) }}" class="back-link">← Back to Pickup #{{ pickup.pickup_id }}</a>
+  <h1 class="page-title">Add E-Waste Item</h1>
+</div>
+<div class="card" style="max-width:520px;padding:24px">
+  <p style="font-size:13px;color:var(--text-dim);margin-bottom:20px">
+    Add an item to your pickup request. You can add multiple items one at a time.
+  </p>
+  <form method="POST">
+    <div class="form-group">
+      <label class="form-label">Category <span style="color:var(--red)">*</span></label>
+      <select name="category_id" class="form-select" required>
+        <option value="">— select category —</option>
+        {% for c in categories %}
+        <option value="{{ c.category_id }}">{{ c.category_name }}{% if c.base_price_per_kg %} — ৳{{ c.base_price_per_kg }}/kg{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Item Description <span style="color:var(--red)">*</span></label>
+      <input name="item_description" class="form-input" placeholder="e.g. Samsung Galaxy S10, Dell Laptop, AA batteries pack" required>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label class="form-label">Condition</label>
+        <select name="condition" class="form-select">
+          <option value="">— unknown —</option>
+          <option value="working">Working</option>
+          <option value="broken">Broken</option>
+          <option value="repairable">Repairable</option>
+          <option value="scrap">Scrap</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Est. Weight (kg)</label>
+        <input name="estimated_weight" type="number" step="0.01" min="0" class="form-input" placeholder="0.50">
+      </div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:16px">
+      <p style="font-size:12px;font-weight:600;color:var(--silver);margin-bottom:8px">⚠ Hazardous Material (optional)</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group" style="margin:0">
+          <label class="form-label" style="font-size:11px">Contains Mercury?</label>
+          <select name="contains_mercury" class="form-select">
+            <option value="">No / Unknown</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label" style="font-size:11px">Battery Count</label>
+          <input name="battery_count" type="number" min="0" class="form-input" placeholder="0">
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button type="submit" class="btn btn-primary" style="flex:1">Add Item</button>
+      <a href="{{ url_for('user_pickup_detail', pid=pickup.pickup_id) }}" class="btn btn-secondary">Done</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}My Payments{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">My Payments</h1>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>Payment #</th><th>Pickup</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th></tr></thead>
+    <tbody>
+    {% for p in payments %}
+    <tr>
+      <td class="mono text-dim">{{ p.payment_id }}</td>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td class="mono text-green fw6">৳{{ '%.2f'|format(p.amount|float) }}</td>
+      <td class="text-dim">{{ p.payment_method }}</td>
+      <td class="mono text-dim font-xs">{{ p.transaction_reference or '—' }}</td>
+      <td class="mono text-dim">{{ p.processed_at.strftime('%d %b %Y') if p.processed_at else '—' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty-cell">No payments yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

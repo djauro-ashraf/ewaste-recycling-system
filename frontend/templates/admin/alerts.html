@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Alerts — Admin{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">System Alerts</h1></div>
+<div class="filter-bar">
+  {% for sev in ['','critical','high','medium','low'] %}
+  <a href="?severity={{ sev }}" class="filter-chip {% if severity_filter == sev %}active{% endif %}">{{ sev.title() if sev else 'All' }}</a>
+  {% endfor %}
+  <a href="?resolved=1" class="filter-chip {% if show_resolved %}active{% endif %}">Show Resolved</a>
+</div>
+<div class="card">
+  {% if alerts %}
+  {% for a in alerts %}
+  <div class="alert-detail sev-{{ a.severity }} {% if a.is_resolved %}resolved{% endif %}">
+    <div class="alert-detail-head">
+      <div class="alert-detail-left">
+        <span class="sev-dot sev-{{ a.severity }}"></span>
+        <strong>{{ a.title }}</strong>
+        <span class="badge badge-sev-{{ a.severity }}">{{ a.severity.upper() }}</span>
+        {% if a.is_resolved %}<span class="badge badge-active">RESOLVED</span>{% endif %}
+      </div>
+      <div class="alert-detail-right">
+        <span class="mono text-dim">{{ a.created_at.strftime('%d %b %Y %H:%M') if a.created_at else '—' }}</span>
+        {% if not a.is_resolved %}
+        <form method="POST" action="{{ url_for('admin_resolve_alert', aid=a.alert_id) }}" style="display:inline">
+          <button class="btn btn-xs btn-ghost">Resolve</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    <div class="alert-detail-desc">{{ a.description }}</div>
+    {% if a.payload %}
+    <div class="alert-payload"><pre class="log-json">{{ a.payload | tojson(indent=2) }}</pre></div>
+    {% endif %}
+    <div class="alert-meta"><span class="text-dim font-xs">Type: {{ a.alert_type }} · #{{ a.related_id or '—' }}</span></div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="empty-state"><div class="empty-icon">✓</div><div class="empty-title">All clear</div></div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Assign Supervisor — #{{ pickup.pickup_id }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{{ url_for('admin_pickups') }}" class="back-link">← All Pickups</a>
+  <h1 class="page-title">Pickup #{{ pickup.pickup_id }}</h1>
+  <span class="page-sub"><span class="badge badge-{{ pickup.status }}">{{ pickup.status.replace('_',' ') }}</span></span>
+</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Pickup Details</div>
+    <dl class="dl-grid">
+      <dt>User</dt><dd>{{ pickup.user_name }} · {{ pickup.user_phone }}</dd>
+      <dt>Address</dt><dd>{{ pickup.pickup_address }}</dd>
+      <dt>Date</dt><dd class="mono">{{ pickup.preferred_date }}</dd>
+      <dt>Items</dt><dd class="mono">{{ pickup.item_count }}</dd>
+      <dt>Weight</dt><dd class="mono">{{ pickup.total_weight_kg or 0 }} kg</dd>
+      {% if pickup.supervisor_name %}<dt>Supervisor</dt><dd>{{ pickup.supervisor_name }}</dd>{% endif %}
+      {% if pickup.driver_name %}<dt>Driver</dt><dd>{{ pickup.driver_name }}</dd>{% endif %}
+      {% if pickup.facility_name %}<dt>Facility</dt><dd>{{ pickup.facility_name }}</dd>{% endif %}
+    </dl>
+  </div>
+  {% if pickup.status == 'pending' %}
+  <div class="card">
+    <div class="card-header">Assign Supervisor &amp; Facility</div>
+    <form method="POST" style="padding:14px 16px">
+      <div class="form-group">
+        <label class="form-label">Supervisor</label>
+        <select name="supervisor_id" class="form-select" required>
+          <option value="">— select supervisor —</option>
+          {% for s in supervisors %}
+          <option value="{{ s.staff_id }}">{{ s.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Receiving Facility</label>
+        <select name="facility_id" class="form-select" required>
+          <option value="">— select facility —</option>
+          {% for f in facilities %}
+          <option value="{{ f.facility_id }}">{{ f.facility_name }} ({{ f.available_kg }} kg free)</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary w-full">Assign to Supervisor</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="card">
+    <div class="card-header">Items</div>
+    <table class="tbl">
+      <thead><tr><th>Description</th><th>Category</th><th>Condition</th><th>Actual kg</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+      <tr>
+        <td>{{ i.item_description }}</td>
+        <td class="text-dim">{{ i.category_name }}</td>
+        <td class="text-dim">{{ i.condition or '—' }}</td>
+        <td class="mono">{{ i.actual_weight_kg or '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-cell">No items.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

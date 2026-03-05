@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Payments — Supervisor{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Payments</h1></div>
+
+<div class="card">
+  <div class="card-header">Awaiting Payment <span class="badge-count-yellow">{{ pending|length }}</span></div>
+  <table class="tbl">
+    <thead><tr><th>#</th><th>User</th><th>Collected</th><th>Due By</th><th>Weight</th><th>Est. Amount</th><th>Requests</th><th></th></tr></thead>
+    <tbody>
+    {% for p in pending %}
+    {% set est = estimated.get(p.pickup_id, 0) %}
+    <tr id="pickup-{{ p.pickup_id }}" {% if p.payment_overdue %}class="row-warn"{% elif p.has_pending_payment_request %}class="row-highlight"{% endif %}>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td class="fw6">{{ p.user_name }}</td>
+      <td class="mono text-dim">{{ p.collected_at.strftime('%d %b %H:%M') if p.collected_at else '—' }}</td>
+      <td class="mono {% if p.payment_overdue %}text-red{% else %}text-yellow{% endif %}">{{ p.payment_due_by.strftime('%d %b %H:%M') if p.payment_due_by else '—' }}</td>
+      <td class="mono">{{ p.total_weight_kg or '—' }} kg</td>
+      <td class="mono fw6 text-green">৳{{ '%.2f'|format(est) }}</td>
+      <td class="mono {% if p.payment_request_count > 1 %}text-red fw6{% elif p.payment_request_count > 0 %}text-yellow{% endif %}">{{ p.payment_request_count }}x</td>
+      <td><button class="btn btn-sm btn-green" onclick="openPayModal({{ p.pickup_id }},'{{ p.user_name|replace("'","\\'") }}',{{ est }})">Pay</button></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="empty-cell text-green">No pending payments.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card" style="margin-top:20px">
+  <div class="card-header">Payment History</div>
+  <table class="tbl">
+    <thead><tr><th>#</th><th>Pickup</th><th>User</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+    <tbody>
+    {% for py in history %}
+    <tr>
+      <td class="mono text-dim">{{ py.payment_id }}</td>
+      <td class="mono">#{{ py.pickup_id }}</td>
+      <td>{{ py.user_name }}</td>
+      <td class="mono text-green">৳{{ '%.2f'|format(py.amount|float) }}</td>
+      <td class="text-dim">{{ py.payment_method }}</td>
+      <td class="mono text-dim">{{ py.processed_at.strftime('%d %b %Y') if py.processed_at else '—' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty-cell">No history.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div id="payModal" class="modal" style="display:none">
+  <div class="modal-box" style="max-width:440px">
+    <div class="modal-title">Process Payment</div>
+    <p class="text-dim font-sm" style="margin-bottom:4px">User: <strong id="mUser"></strong></p>
+    <form method="POST" action="{{ url_for('sup_process_payment') }}">
+      <input type="hidden" name="pickup_id" id="mPid">
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Amount (৳)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" name="custom_amount" id="mCustomAmt"
+                 class="form-input" step="0.01" min="0"
+                 placeholder="Leave blank to auto-calculate"
+                 style="flex:1">
+          <button type="button" class="btn btn-sm btn-ghost" onclick="resetToCalc()" style="white-space:nowrap;font-size:11px" id="calcHint"></button>
+        </div>
+        <p class="text-dim font-xs" style="margin-top:4px">
+          Auto-calculated from items: <strong id="mCalcAmt" class="text-green"></strong>.
+          Leave blank to use this, or enter a custom amount to override.
+        </p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <select name="payment_method" class="form-select" required>
+          <option value="mobile_money">Mobile Money</option>
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="cash">Cash</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Transaction Reference <span class="text-dim font-xs">(optional)</span></label>
+        <input name="txn_ref" class="form-input" placeholder="TXN-12345">
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="document.getElementById('payModal').style.display='none'" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-green">Confirm Payment</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+var calcAmount = 0;
+function openPayModal(id, user, calc) {
+  calcAmount = calc;
+  document.getElementById('mPid').value = id;
+  document.getElementById('mUser').textContent = user;
+  document.getElementById('mCalcAmt').textContent = '৳' + calc.toFixed(2);
+  document.getElementById('calcHint').textContent = 'Reset to ৳' + calc.toFixed(2);
+  document.getElementById('mCustomAmt').value = '';
+  document.getElementById('payModal').style.display = 'flex';
+}
+function resetToCalc() {
+  document.getElementById('mCustomAmt').value = '';
+}
+var focus = new URLSearchParams(window.location.search).get('focus');
+if (focus) { var r = document.getElementById('pickup-' + focus); if (r) r.scrollIntoView({behavior:'smooth',block:'center'}); }
+</script>
+{% endblock %}

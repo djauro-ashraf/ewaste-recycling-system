@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Supervisor Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">My Dashboard</h1>
+  <span class="page-sub">{{ current_user.full_name }} — Supervisor</span>
+</div>
+
+{% if pay_requests %}
+<div class="alert-banner">
+  <div class="alert-banner-icon">⏳</div>
+  <div class="alert-banner-text"><strong>{{ pay_requests|length }} payment request(s)</strong> from users awaiting your action.</div>
+  <a href="{{ url_for('sup_pay_requests') }}" class="btn btn-sm btn-warn">Review</a>
+</div>
+{% endif %}
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Needs Field Assignment</div>
+    <div class="stat-value text-warn">{{ needs_assignment|length }}</div>
+    <div class="stat-sub">Supervisor-assigned, no team yet</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">In Progress</div>
+    <div class="stat-value text-blue">{{ in_progress|length }}</div>
+    <div class="stat-sub">Field team active</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Awaiting Payment</div>
+    <div class="stat-value text-yellow">{{ stats.get('pending_payment', 0) }}</div>
+    <div class="stat-sub">Collected, ready to pay user</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Overdue Payments</div>
+    <div class="stat-value {% if stats.get('overdue_payments',0) > 0 %}text-red{% else %}text-green{% endif %}">{{ stats.get('overdue_payments', 0) }}</div>
+    <div class="stat-sub">Past 72h window</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Paid Out</div>
+    <div class="stat-value text-green">৳{{ '{:,.0f}'.format(stats.get('total_paid_out', 0)) }}</div>
+    <div class="stat-sub">Lifetime under my supervision</div>
+  </div>
+</div>
+
+{% if needs_assignment %}
+<div class="card" style="margin-top:20px">
+  <div class="card-header">Needs Field Assignment <span class="badge-count-yellow">{{ needs_assignment|length }}</span></div>
+  <table class="tbl">
+    <thead><tr><th>#</th><th>User</th><th>Address</th><th>Date</th><th>Items</th><th></th></tr></thead>
+    <tbody>
+    {% for p in needs_assignment %}
+    <tr>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td>{{ p.user_name }}</td>
+      <td class="text-dim font-xs">{{ p.pickup_address[:50] }}…</td>
+      <td class="mono text-dim">{{ p.preferred_date }}</td>
+      <td class="mono">{{ p.item_count }}</td>
+      <td><a href="{{ url_for('sup_assign', pid=p.pickup_id) }}" class="btn btn-sm btn-primary">Assign Team</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if in_progress %}
+<div class="card" style="margin-top:20px">
+  <div class="card-header">In Progress <span class="badge-count-yellow">{{ in_progress|length }}</span></div>
+  <table class="tbl">
+    <thead><tr><th>#</th><th>User</th><th>Status</th><th>Collector</th><th>Driver</th></tr></thead>
+    <tbody>
+    {% for p in in_progress %}
+    <tr>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td>{{ p.user_name }}</td>
+      <td>
+        <span class="badge badge-{{ p.status }}">{{ p.status.replace('_',' ') }}</span>
+        {% if p.collector_confirmed %}<span class="badge badge-active" style="margin-left:4px;font-size:10px">Col ✓</span>{% endif %}
+        {% if p.driver_confirmed %}<span class="badge badge-active" style="margin-left:4px;font-size:10px">Drv ✓</span>{% endif %}
+      </td>
+      <td class="text-dim">{{ p.collector_name or '—' }} {% if p.collector_confirmed %}<span class="text-green">✓</span>{% endif %}</td>
+      <td class="text-dim">{{ p.driver_name or '—' }} {% if p.driver_confirmed %}<span class="text-green">✓</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="grid-2" style="margin-top:20px">
+  <div class="card">
+    <div class="card-header">My Team</div>
+    <table class="tbl">
+      <thead><tr><th>Name</th><th>Role</th><th>Available</th></tr></thead>
+      <tbody>
+      {% for m in team %}
+      <tr>
+        <td class="fw6">{{ m.full_name }}</td>
+        <td><span class="badge badge-subrole-{{ m.sub_role }}">{{ m.sub_role }}</span></td>
+        <td><span class="badge badge-{{ 'active' if m.is_available else 'cancelled' }}">{{ 'Yes' if m.is_available else 'Busy' }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="empty-cell">No team members.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-header">My Vehicles</div>
+    <table class="tbl">
+      <thead><tr><th>Number</th><th>Type</th><th>Capacity</th><th>Available</th></tr></thead>
+      <tbody>
+      {% for v in vehicles %}
+      <tr>
+        <td class="mono fw6">{{ v.vehicle_number }}</td>
+        <td class="text-dim">{{ v.vehicle_type }}</td>
+        <td class="mono">{{ v.capacity_kg }} kg</td>
+        <td><span class="badge badge-{{ 'active' if v.is_available else 'cancelled' }}">{{ 'Yes' if v.is_available else 'In Use' }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-cell">No vehicles.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

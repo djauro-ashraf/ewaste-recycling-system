@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Complete Batch {{ batch.batch_name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{{ url_for('sup_batches') }}" class="back-link">← Batches</a>
+  <h1 class="page-title">Complete Batch</h1>
+  <span class="page-sub">{{ batch.batch_name }} · {{ batch.item_count }} items · {{ batch.total_weight_kg }} kg</span>
+</div>
+<div class="card" style="max-width:600px;padding:24px">
+  <form method="POST">
+    <div class="form-group">
+      <label class="form-label">Recovery Rate (%)</label>
+      <input name="recovery_rate" type="number" step="0.1" min="0" max="100" class="form-input" placeholder="72.5" required>
+    </div>
+    <div style="margin:16px 0 8px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim)">Material Recovery Entries</div>
+    <div id="mRows">
+      <div class="form-grid-3">
+        <input name="material_0" class="form-input" placeholder="Material (e.g. copper)" required>
+        <input name="weight_0" type="number" step="0.01" class="form-input" placeholder="Weight (kg)" required>
+        <input name="price_0" type="number" step="0.01" class="form-input" placeholder="Price/kg (৳)" required>
+      </div>
+    </div>
+    <button type="button" onclick="addRow()" class="btn btn-sm btn-ghost" style="margin:8px 0 16px">+ Add Material</button>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea name="notes" class="form-textarea" rows="2"></textarea>
+    </div>
+    <button type="submit" class="btn btn-green w-full">Complete Batch &amp; Record Revenue</button>
+  </form>
+</div>
+<script>
+var n=0;
+function addRow(){n++;var d=document.createElement('div');d.className='form-grid-3';d.style.marginBottom='8px';
+d.innerHTML='<input name="material_'+n+'" class="form-input" placeholder="Material" required>'
++'<input name="weight_'+n+'" type="number" step="0.01" class="form-input" placeholder="Weight (kg)" required>'
++'<input name="price_'+n+'" type="number" step="0.01" class="form-input" placeholder="Price/kg (৳)" required>';
+document.getElementById('mRows').appendChild(d);}
+</script>
+{% endblock %}

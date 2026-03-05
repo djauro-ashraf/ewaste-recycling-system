@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Assignments{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">My Assignments</h1>
+  <span class="page-sub">{{ current_user.sub_role.title() }}</span>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>#</th><th>User</th><th>Address</th><th>Date</th><th>Status</th><th>Items</th><th></th></tr></thead>
+    <tbody>
+    {% for p in pickups %}
+    <tr>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td>{{ p.user_name }}</td>
+      <td class="text-dim font-xs">{{ p.pickup_address[:40] }}…</td>
+      <td class="mono text-dim">{{ p.preferred_date }}</td>
+      <td>
+        <span class="badge badge-{{ p.status }}">{{ p.status.replace('_',' ') }}</span>
+        {% if sub_role == 'driver' and p.status == 'picked_up' %}
+        <span class="badge badge-active" style="margin-left:4px;font-size:10px">Collector done ✓</span>
+        {% endif %}
+        {% if sub_role == 'collector' and p.status == 'delivered' %}
+        <span class="badge badge-active" style="margin-left:4px;font-size:10px">Driver done ✓</span>
+        {% endif %}
+      </td>
+      <td class="mono">{{ p.item_count }}</td>
+      <td>
+        {% if sub_role == 'collector' and p.status == 'field_assigned' %}
+        <a href="{{ url_for('field_collect', pid=p.pickup_id) }}" class="btn btn-sm btn-primary">Collect</a>
+        {% elif sub_role == 'driver' and p.status == 'picked_up' %}
+        <form method="POST" action="{{ url_for('field_deliver', pid=p.pickup_id) }}" style="display:inline">
+          <button class="btn btn-sm btn-primary">Confirm Delivery</button>
+        </form>
+        {% elif sub_role == 'driver' and p.status == 'field_assigned' %}
+        <span class="text-dim font-xs" style="font-style:italic">Waiting for collector…</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="empty-cell">No active assignments.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Batches — Supervisor{% endblock %}
+{% block content %}
+<div class="page-header"><h1 class="page-title">Recycling Batches</h1></div>
+<div class="card" style="max-width:420px;margin-bottom:20px;padding:16px">
+  <div class="card-header">Create New Batch</div>
+  <form method="POST" action="{{ url_for('sup_create_batch') }}" style="padding:14px 0 0">
+    <div class="form-group">
+      <label class="form-label">Batch Name</label>
+      <input name="batch_name" class="form-input" placeholder="BATCH-2025-001" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Facility</label>
+      <select name="facility_id" class="form-select" required>
+        <option value="">— select —</option>
+        {% for f in facilities %}
+        <option value="{{ f.facility_id }}">{{ f.facility_name }} ({{ f.available_kg }} kg free)</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea name="notes" class="form-textarea" rows="2"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Batch</button>
+  </form>
+</div>
+<div class="card">
+  <div class="card-header">All Batches</div>
+  <table class="tbl">
+    <thead><tr><th>Batch</th><th>Facility</th><th>Status</th><th>Pickups</th><th>Items</th><th>Weight</th><th>Revenue</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for b in batches %}
+    <tr>
+      <td class="mono fw6">{{ b.batch_name }}</td>
+      <td class="text-dim">{{ b.facility_name }}</td>
+      <td><span class="badge badge-batch-{{ b.status }}">{{ b.status }}</span></td>
+      <td class="mono">{{ b.pickup_count }}</td>
+      <td class="mono">{{ b.item_count }}</td>
+      <td class="mono">{{ '%.2f'|format(b.live_weight_kg|float) }} kg</td>
+      <td class="mono text-green">{% if b.recorded_revenue %}৳{{ '{:,.0f}'.format(b.recorded_revenue) }}{% else %}—{% endif %}</td>
+      <td class="flex-actions">
+        {% if b.status == 'open' %}
+        <a href="{{ url_for('sup_batch_add_items', bid=b.batch_id) }}" class="btn btn-xs btn-ghost">Add Items</a>
+        {% if b.pickup_count >= 2 %}
+        <form method="POST" action="{{ url_for('sup_process_batch', bid=b.batch_id) }}">
+          <button class="btn btn-xs btn-primary">Process</button>
+        </form>
+        {% endif %}
+        {% elif b.status == 'processing' %}
+        <a href="{{ url_for('sup_complete_batch', bid=b.batch_id) }}" class="btn btn-xs btn-green">Complete</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="empty-cell">No batches yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

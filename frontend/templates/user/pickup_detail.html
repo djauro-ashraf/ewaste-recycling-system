@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Pickup #{{ pickup.pickup_id }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{{ url_for('user_pickups') }}" class="back-link">← My Pickups</a>
+  <h1 class="page-title">Pickup #{{ pickup.pickup_id }}</h1>
+  <span class="page-sub"><span class="badge badge-{{ pickup.status }}">{{ pickup.status.replace('_',' ') }}</span></span>
+</div>
+
+{% if pickup.status == 'collected' %}
+  {% if payment %}
+  <div class="alert-banner" style="border-color:var(--green);background:#1a2e1a">
+    <div class="alert-banner-icon" style="color:var(--green)">✓</div>
+    <div class="alert-banner-text">Your payment of <strong>৳{{ pickup.total_amount }}</strong> has been processed.</div>
+  </div>
+  {% elif pay_req %}
+  <div class="alert-banner" style="border-color:var(--yellow)">
+    <div class="alert-banner-icon" style="color:var(--yellow)">⏳</div>
+    <div class="alert-banner-text">Payment request submitted. Your supervisor will process it soon.</div>
+  </div>
+  {% elif pickup.payment_due_by %}
+  <div class="alert-banner" style="border-color:var(--blue)">
+    <div class="alert-banner-icon" style="color:var(--blue)">ℹ</div>
+    <div class="alert-banner-text">
+      Your pickup was collected. Payment window opens after <strong>{{ pickup.payment_due_by.strftime('%d %b %Y %H:%M') if pickup.payment_due_by else '72 hours' }}</strong>.
+      {% set now_ts = namespace(v=0) %}
+      <form method="POST" action="{{ url_for('user_request_payment', pid=pickup.pickup_id) }}" style="display:inline;margin-left:12px">
+        <input name="notes" type="hidden" value="">
+        <button class="btn btn-sm btn-warn">Request Payment</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert-banner" style="border-color:var(--blue)">
+    <div class="alert-banner-icon" style="color:var(--blue)">ℹ</div>
+    <div class="alert-banner-text">Pickup collected. Payment will be processed within 72 hours.</div>
+  </div>
+  {% endif %}
+{% endif %}
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Details</div>
+    <dl class="dl-grid">
+      <dt>Address</dt><dd>{{ pickup.pickup_address }}</dd>
+      <dt>Preferred Date</dt><dd class="mono">{{ pickup.preferred_date }}</dd>
+      <dt>Requested</dt><dd class="mono text-dim">{{ pickup.request_date.strftime('%d %b %Y') if pickup.request_date else '—' }}</dd>
+      <dt>Weight</dt><dd class="mono">{{ pickup.total_weight_kg or '—' }} kg</dd>
+      <dt>Amount</dt><dd class="mono">{% if pickup.total_amount is not none %}৳{{ pickup.total_amount }}{% else %}—{% endif %}</dd>
+      {% if pickup.supervisor_name %}<dt>Supervisor</dt><dd>{{ pickup.supervisor_name }}</dd>{% endif %}
+      {% if pickup.driver_name %}<dt>Driver</dt><dd>{{ pickup.driver_name }}</dd>{% endif %}
+      {% if pickup.facility_name %}<dt>Facility</dt><dd>{{ pickup.facility_name }}</dd>{% endif %}
+    </dl>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Items ({{ items|length }})</span>
+      {% if pickup.status in ('pending','supervisor_assigned','field_assigned') %}
+      <a href="{{ url_for('user_add_item', pid=pickup.pickup_id) }}" class="btn btn-sm btn-primary">+ Add Item</a>
+      {% endif %}
+    </div>
+    {% if items %}
+    <table class="tbl">
+      <thead><tr><th>Description</th><th>Category</th><th>Est. kg</th><th>Actual kg</th></tr></thead>
+      <tbody>
+      {% for i in items %}
+      <tr>
+        <td>{{ i.item_description }}</td>
+        <td class="text-dim">{{ i.category_name }}</td>
+        <td class="mono">{{ i.estimated_weight_kg or '—' }}</td>
+        <td class="mono">{{ i.actual_weight_kg or '—' }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div style="padding:20px 16px;text-align:center;color:var(--text-dim)">
+      <div style="font-size:28px;margin-bottom:8px">📦</div>
+      <p style="margin-bottom:12px">No items added yet.</p>
+      {% if pickup.status in ('pending','supervisor_assigned','field_assigned') %}
+      <a href="{{ url_for('user_add_item', pid=pickup.pickup_id) }}" class="btn btn-sm btn-primary">+ Add Your First Item</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

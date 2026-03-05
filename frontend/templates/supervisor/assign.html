@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Assign Field Team — #{{ pickup.pickup_id }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{{ url_for('sup_pickups') }}" class="back-link">← My Pickups</a>
+  <h1 class="page-title">Assign Field Team</h1>
+  <span class="page-sub">Pickup #{{ pickup.pickup_id }} · {{ pickup.user_name }}</span>
+</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Pickup Details</div>
+    <dl class="dl-grid">
+      <dt>User</dt><dd>{{ pickup.user_name }} · {{ pickup.user_phone }}</dd>
+      <dt>Address</dt><dd>{{ pickup.pickup_address }}</dd>
+      <dt>Date</dt><dd class="mono">{{ pickup.preferred_date }}</dd>
+      <dt>Facility</dt><dd>{{ pickup.facility_name }}</dd>
+      <dt>Items</dt><dd class="mono">{{ pickup.item_count }}</dd>
+    </dl>
+  </div>
+  <div class="card">
+    <div class="card-header">Assign Driver, Collector &amp; Vehicle</div>
+    <form method="POST" style="padding:14px 16px">
+      <div class="form-group">
+        <label class="form-label">Driver</label>
+        <select name="driver_id" class="form-select" required>
+          <option value="">— select driver —</option>
+          {% for d in drivers %}
+          <option value="{{ d.staff_id }}" {% if not d.is_available %}disabled{% endif %}>
+            {{ d.full_name }}{% if not d.is_available %} (unavailable){% endif %}
+          </option>
+          {% else %}<option disabled>No drivers in your team</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Collector</label>
+        <select name="collector_id" class="form-select" required>
+          <option value="">— select collector —</option>
+          {% for c in collectors %}
+          <option value="{{ c.staff_id }}" {% if not c.is_available %}disabled{% endif %}>
+            {{ c.full_name }}{% if not c.is_available %} (unavailable){% endif %}
+          </option>
+          {% else %}<option disabled>No collectors in your team</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vehicle</label>
+        <select name="vehicle_id" class="form-select" required>
+          <option value="">— select vehicle —</option>
+          {% for v in vehicles %}
+          <option value="{{ v.vehicle_id }}" {% if not v.is_available %}disabled{% endif %}>
+            {{ v.vehicle_number }} ({{ v.vehicle_type }}, {{ v.capacity_kg }}kg){% if not v.is_available %} — in use{% endif %}
+          </option>
+          {% else %}<option disabled>No vehicles</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary w-full">Assign Field Team</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

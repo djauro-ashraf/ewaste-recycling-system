@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Add Items — {{ batch.batch_name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{{ url_for('sup_batches') }}" class="back-link">← Batches</a>
+  <h1 class="page-title">{{ batch.batch_name }}</h1>
+  <span class="page-sub">{{ batch.facility_name }} · {{ batch.pickup_count }} pickup(s) · {{ batch.item_count }} item(s)</span>
+</div>
+
+<div class="grid-2">
+  <!-- LEFT: available items to add -->
+  <div class="card">
+    <div class="card-header">Available Items
+      <span class="text-dim font-xs" style="font-weight:400;margin-left:6px">(collected &amp; completed pickups)</span>
+    </div>
+    <form method="POST" style="padding:14px 16px">
+      <div class="item-checklist">
+      {% for item in available_items %}
+      <label class="check-row">
+        <input type="checkbox" name="item_ids" value="{{ item.item_id }}">
+        <span>
+          <span class="fw6">{{ item.item_description }}</span>
+          <span class="text-dim font-xs">
+            · {{ item.category_name }}
+            · {{ '%.2f'|format(item.effective_weight|float) }} kg
+            · Pickup #{{ item.pickup_id }}
+            <span class="badge badge-{{ item.pickup_status }}" style="font-size:9px;padding:1px 5px;margin-left:2px">{{ item.pickup_status }}</span>
+          </span>
+        </span>
+      </label>
+      {% else %}
+      <p class="text-dim font-sm" style="padding:12px 0">
+        No eligible items. Items are available once their pickup is in <em>collected</em> or <em>completed</em> status.
+      </p>
+      {% endfor %}
+      </div>
+      {% if available_items %}
+      <button type="submit" class="btn btn-primary" style="margin-top:12px">Add Selected →</button>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- RIGHT: items already in batch + totals + process -->
+  <div class="card">
+    <div class="card-header">Items in Batch ({{ batch_items|length }})</div>
+    <table class="tbl">
+      <thead><tr><th>Item</th><th>Category</th><th>Pickup</th><th>Weight (kg)</th><th>Est. Value</th></tr></thead>
+      <tbody>
+      {% for i in batch_items %}
+      <tr>
+        <td>{{ i.item_description }}</td>
+        <td class="text-dim font-xs">{{ i.category_name }}</td>
+        <td class="mono text-dim">#{{ i.pickup_id }}</td>
+        <td class="mono">{{ '%.2f'|format(i.effective_weight|float) }}</td>
+        <td class="mono text-dim">৳{{ '%.2f'|format(i.est_value|float) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-cell">No items yet — add some from the left.</td></tr>
+      {% endfor %}
+      {% if batch_items %}
+      <tr style="border-top:2px solid var(--border);font-weight:700">
+        <td colspan="3" class="text-dim" style="text-align:right;padding-right:8px">Total</td>
+        <td class="mono">{{ '%.2f'|format(batch_total_weight) }} kg</td>
+        <td class="mono text-green">৳{{ '%.2f'|format(batch_total_value) }}</td>
+      </tr>
+      {% endif %}
+      </tbody>
+    </table>
+
+    {% if batch_items %}
+    <div style="padding:16px;border-top:1px solid var(--border)">
+      {% if batch.pickup_count >= 2 %}
+      <p class="text-dim font-xs" style="margin-bottom:8px">
+        ✓ {{ batch.pickup_count }} distinct pickups — ready to process.
+      </p>
+      <form method="POST" action="{{ url_for('sup_process_batch', bid=batch.batch_id) }}">
+        <button class="btn btn-primary w-full">Start Processing →</button>
+      </form>
+      {% else %}
+      <p class="text-dim font-xs" style="margin-bottom:8px">
+        ⚠ Need items from at least <strong>2 distinct pickups</strong> to process
+        (currently {{ batch.pickup_count }}).
+      </p>
+      <button class="btn btn-primary w-full" disabled style="opacity:0.4;cursor:not-allowed">Start Processing</button>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

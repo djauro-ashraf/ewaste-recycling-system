@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Reports — Admin{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Reports &amp; Analytics</h1>
+  <span class="page-sub">Business performance and operational metrics</span>
+</div>
+
+{% set sys_rev = namespace(total=0) %}
+{% for r in rev_sum %}{% set sys_rev.total = sys_rev.total + (r.total_revenue or 0) %}{% endfor %}
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">System Revenue</div>
+    <div class="stat-value text-silver">৳{{ '{:,.0f}'.format(sys_rev.total) }}</div>
+    <div class="stat-sub">From processed recycled materials</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Active Supervisors</div>
+    <div class="stat-value">{{ sup_stats|length }}</div>
+    <div class="stat-sub">Operational supervisors</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Categories with Data</div>
+    <div class="stat-value">{{ cat_stats|length }}</div>
+    <div class="stat-sub">Active e-waste types</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Pickups (Monthly)</div>
+    <div class="stat-value">{{ monthly[0].total_pickups if monthly else 0 }}</div>
+    <div class="stat-sub">This month</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">System Revenue by Material</div>
+    <table class="tbl">
+      <thead>
+        <tr><th>Material</th><th>Facility</th><th>Weight (kg)</th><th>Avg ৳/kg</th><th>Revenue</th></tr>
+      </thead>
+      <tbody>
+      {% for r in rev_sum %}
+      <tr>
+        <td class="fw6 text-silver">{{ r.material_type }}</td>
+        <td class="text-dim">{{ r.facility_name }}</td>
+        <td class="mono">{{ r.total_weight_kg }}</td>
+        <td class="mono">৳{{ r.avg_price_per_kg }}</td>
+        <td class="mono text-green">৳{{ '{:,.2f}'.format(r.total_revenue or 0) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-cell">No revenue recorded yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Category Statistics</div>
+    <table class="tbl">
+      <thead>
+        <tr><th>Category</th><th>Items</th><th>Weight (kg)</th><th>Hazard</th><th>Mercury</th></tr>
+      </thead>
+      <tbody>
+      {% for c in cat_stats %}
+      <tr>
+        <td class="fw6">{{ c.category_name }}</td>
+        <td class="mono">{{ c.total_items }}</td>
+        <td class="mono">{{ c.total_weight_kg }}</td>
+        <td><span class="hazard-{{ c.hazard_level }}">L{{ c.hazard_level }}</span></td>
+        <td class="mono {% if c.mercury_items > 0 %}text-red{% endif %}">{{ c.mercury_items }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-cell">No data.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid-2" style="margin-top:20px">
+  <div class="card">
+    <div class="card-header">Top Users by Earnings</div>
+    <table class="tbl">
+      <thead>
+        <tr><th>User</th><th>City</th><th>Pickups</th><th>Weight (kg)</th><th>Earned</th></tr>
+      </thead>
+      <tbody>
+      {% for u in user_top %}
+      <tr>
+        <td class="fw6">{{ u.full_name }}</td>
+        <td class="text-dim">{{ u.city }}</td>
+        <td class="mono">{{ u.completed_pickups }}</td>
+        <td class="mono">{{ u.total_weight }}</td>
+        <td class="mono text-green">৳{{ '{:,.0f}'.format(u.total_earnings or 0) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-cell">No data.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Facility Capacity</div>
+    {% for f in fac_cap %}
+    <div class="capacity-row">
+      <div class="capacity-label">
+        <span class="fw6">{{ f.facility_name }}</span>
+        <span class="mono text-dim">{{ f.current_load_kg }}/{{ f.capacity_kg }} kg</span>
+      </div>
+      <div class="capacity-bar">
+        <div class="capacity-fill {% if (f.utilisation_pct or 0) > 85 %}fill-red{% elif (f.utilisation_pct or 0) > 60 %}fill-yellow{% else %}fill-green{% endif %}"
+             style="width:{{ [f.utilisation_pct or 0, 100]|min }}%"></div>
+      </div>
+      <div class="capacity-pct">{{ f.utilisation_pct or 0 }}%</div>
+    </div>
+    {% else %}
+    <div class="empty-state-sm">No facility data.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="grid-2" style="margin-top:20px">
+  <div class="card">
+    <div class="card-header">Supervisor Performance</div>
+    <table class="tbl">
+      <thead>
+        <tr><th>Supervisor</th><th>Completed</th><th>Pending Pay</th><th>Paid Out</th></tr>
+      </thead>
+      <tbody>
+      {% for s in sup_stats %}
+      <tr>
+        <td class="fw6">{{ s.supervisor_name }}</td>
+        <td class="mono text-green">{{ s.completed_pickups }}</td>
+        <td class="mono {% if s.pending_payment > 0 %}text-yellow{% endif %}">{{ s.pending_payment }}</td>
+        <td class="mono">৳{{ '{:,.0f}'.format(s.total_paid_out or 0) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-cell">No data.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Monthly Pickup Trends</div>
+    <table class="tbl">
+      <thead>
+        <tr><th>Period</th><th>Pickups</th><th>Weight (kg)</th><th>Amount Paid</th></tr>
+      </thead>
+      <tbody>
+      {% for m in monthly %}
+      <tr>
+        <td class="fw6 mono">{{ m.period }}</td>
+        <td class="mono">{{ m.total_pickups }}</td>
+        <td class="mono">{{ m.total_weight }}</td>
+        <td class="mono text-green">৳{{ '{:,.0f}'.format(m.total_payout or 0) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-cell">No data.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

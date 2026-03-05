@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}My Pickups{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">My Pickups</h1>
+  <a href="{{ url_for('user_new_pickup') }}" class="btn btn-primary btn-sm" style="margin-top:6px">+ New Pickup</a>
+</div>
+<div class="card">
+  <table class="tbl">
+    <thead><tr><th>#</th><th>Date</th><th>Address</th><th>Status</th><th>Items</th><th>Amount</th><th></th></tr></thead>
+    <tbody>
+    {% for p in pickups %}
+    <tr>
+      <td class="mono">#{{ p.pickup_id }}</td>
+      <td class="mono text-dim">{{ p.preferred_date }}</td>
+      <td class="text-dim font-xs">{{ p.pickup_address[:40] }}…</td>
+      <td><span class="badge badge-{{ p.status }}">{{ p.status.replace('_',' ') }}</span></td>
+      <td class="mono">{{ p.item_count }}</td>
+      <td class="mono">{% if p.total_amount is not none %}৳{{ p.total_amount }}{% else %}—{% endif %}</td>
+      <td><a href="{{ url_for('user_pickup_detail', pid=p.pickup_id) }}" class="btn btn-xs btn-ghost">View</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="empty-cell">No pickups yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}EWaste RMS{% endblock %}</title>
+<style>
+:root{
+  --bg:#1a1c1e;--bg2:#22262b;--bg3:#2b3038;--border:#3a4048;
+  --silver:#b0bec5;--silver-l:#cfd8dc;--silver-ll:#eceff1;
+  --accent:#78909c;--accent-h:#90a4ae;
+  --green:#4caf50;--green-d:#388e3c;
+  --yellow:#ffc107;--red:#ef5350;--blue:#42a5f5;--orange:#ff7043;
+  --text:#cfd8dc;--text-dim:#78909c;--sidebar-w:230px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100}
+.sidebar-logo{padding:20px 16px 14px;border-bottom:1px solid var(--border)}
+.brand{font-size:13px;font-weight:700;letter-spacing:2px;color:var(--silver-l);text-transform:uppercase}
+.sub{font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-top:2px}
+.sidebar-role{padding:10px 16px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--border)}
+.sidebar nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-group{padding:8px 0}
+.nav-label{padding:6px 16px;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:var(--silver);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.nav-link:hover{background:var(--bg3);color:var(--silver-ll);border-left-color:var(--accent)}
+.nav-link.active{background:var(--bg3);color:var(--silver-ll);border-left-color:var(--silver-l)}
+.icon{width:16px;text-align:center;font-style:normal;opacity:.8}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-dim)}
+.sidebar-footer a{color:var(--silver);text-decoration:none}.sidebar-footer a:hover{color:var(--silver-ll)}
+.user-name{font-weight:600;color:var(--silver-l);font-size:13px;margin-bottom:2px}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.topbar-title{font-size:13px;font-weight:600;color:var(--silver)}
+.content{padding:28px 24px;flex:1}
+.flash-stack{padding:12px 24px 0}
+.alert{padding:10px 14px;border-radius:4px;font-size:13px;margin-bottom:8px}
+.alert-success{background:#1a3020;border:1px solid var(--green);color:#a5d6a7}
+.alert-danger  {background:#3b1a1a;border:1px solid var(--red);color:#ef9a9a}
+.alert-warning {background:#2e2010;border:1px solid var(--yellow);color:#ffe082}
+.alert-info    {background:#1a2a3a;border:1px solid var(--blue);color:#90caf9}
+/* ── Layout ── */
+.page-header{margin-bottom:24px}
+.page-title{font-size:22px;font-weight:700;color:var(--silver-ll);display:block}
+.page-sub{font-size:13px;color:var(--text-dim);margin-top:2px;display:block}
+.back-link{font-size:12px;color:var(--text-dim);text-decoration:none;display:inline-block;margin-bottom:8px}
+.back-link:hover{color:var(--silver)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:1100px){.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+.w-full{width:100%}
+/* ── Cards ── */
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px}
+.stat-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
+.stat-value{font-size:28px;font-weight:700;color:var(--silver-ll);line-height:1.1}
+.stat-sub{font-size:11px;color:var(--text-dim);margin-top:4px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:4px}
+.card-header{padding:12px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-footer{padding:10px 16px;border-top:1px solid var(--border);font-size:12px}
+.link-more{color:var(--accent);text-decoration:none;font-size:12px}
+/* ── Tables ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--border)}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(58,64,72,.5);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl-compact th,.tbl-compact td{padding:7px 10px}
+.empty-cell{text-align:center;color:var(--text-dim);padding:24px !important}
+.mono{font-family:'Cascadia Code','Fira Code',monospace;font-size:12px}
+.font-xs{font-size:11px}.font-sm{font-size:12px}.fw6{font-weight:600}
+.text-green{color:var(--green)}.text-red{color:var(--red)}.text-yellow{color:var(--yellow)}
+.text-blue{color:var(--blue)}.text-warn{color:var(--orange)}.text-silver{color:var(--silver-l)}
+.text-dim{color:var(--text-dim)}.flex-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.row-warn td{background:rgba(255,193,7,.04)!important}.row-danger td{background:rgba(239,83,80,.05)!important}
+.row-highlight td{background:rgba(66,165,245,.04)!important}.row-dim td{opacity:.7}
+/* ── Filter ── */
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.filter-chip{padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;background:var(--bg2);border:1px solid var(--border);color:var(--text-dim);text-decoration:none;transition:all .15s}
+.filter-chip:hover,.filter-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+/* ── Badges ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.badge-pending          {background:#2a2010;color:var(--yellow)}
+.badge-supervisor_assigned{background:#1a2030;color:#90caf9}
+.badge-field_assigned   {background:#1a1e3a;color:#7986cb}
+.badge-collected        {background:#1a2e3a;color:#4dd0e1}
+.badge-completed        {background:#1a2e1a;color:var(--green)}
+.badge-cancelled        {background:#2e1a1a;color:var(--red)}
+.badge-open             {background:#2a2010;color:var(--yellow)}
+.badge-processing       {background:#1a2a3a;color:var(--blue)}
+.badge-active           {background:#1a2e1a;color:var(--green)}
+.badge-warn             {background:#2e2010;color:var(--yellow)}
+.badge-sev-critical     {background:#3b1a1a;color:var(--red)}
+.badge-sev-high         {background:#3b2610;color:var(--orange)}
+.badge-sev-medium       {background:#2e2010;color:var(--yellow)}
+.badge-sev-low          {background:#1a2a20;color:var(--green)}
+.badge-op-insert        {background:#1a2e1a;color:var(--green)}
+.badge-op-update        {background:#1a2e3a;color:var(--blue)}
+.badge-op-delete        {background:#2e1a1a;color:var(--red)}
+.badge-op-fire          {background:#3b1a1a;color:var(--red)}
+.badge-subrole-supervisor{background:#252030;color:#ce93d8}
+.badge-subrole-driver   {background:#1a2030;color:#4dd0e1}
+.badge-subrole-collector{background:#1a2830;color:#90caf9}
+.badge-batch-open       {background:#2a2010;color:var(--yellow)}
+.badge-batch-processing {background:#1a2a3a;color:var(--blue)}
+.badge-batch-completed  {background:#1a2e1a;color:var(--green)}
+.badge-batch-cancelled  {background:#2e1a1a;color:var(--red)}
+.badge-ustatus-active   {background:#1a2e1a;color:var(--green)}
+.badge-ustatus-idle     {background:#2a2010;color:var(--yellow)}
+.badge-ustatus-inactive {background:#2e1a1a;color:var(--orange)}
+.badge-ustatus-suspended{background:#3b1a1a;color:var(--red)}
+.badge-count-red{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;margin-left:4px}
+.badge-count-yellow{background:var(--yellow);color:#000;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;margin-left:4px}
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-h)}
+.btn-green  {background:#2e7d32;color:#fff}.btn-green:hover{background:var(--green)}
+.btn-warn   {background:#e65100;color:#fff}.btn-warn:hover{background:var(--orange)}
+.btn-danger {background:#c62828;color:#fff}.btn-danger:hover{background:var(--red)}
+.btn-ghost  {background:transparent;color:var(--silver);border:1px solid var(--border)}.btn-ghost:hover{background:var(--bg3);color:var(--silver-ll)}
+.btn-sm{padding:4px 10px;font-size:12px}.btn-xs{padding:2px 7px;font-size:11px}
+/* ── Forms ── */
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim)}
+.form-input,.form-select,.form-textarea{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:9px 12px;font-size:13px;color:var(--silver-ll);outline:none;width:100%;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px}
+/* ── Tabs ── */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab-btn{background:none;border:none;color:var(--text-dim);padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab-btn:hover{color:var(--silver)}.tab-btn.active{color:var(--silver-l);border-bottom-color:var(--silver)}
+/* ── DL Grid ── */
+.dl-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;padding:14px 16px}
+.dl-grid dt{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-dim);align-self:start;padding-top:1px}
+.dl-grid dd{font-size:13px;color:var(--silver-l)}
+/* ── Alert banner ── */
+.alert-banner{display:flex;align-items:center;gap:12px;background:#2e2010;border:1px solid var(--yellow);border-radius:6px;padding:12px 16px;margin-bottom:16px}
+.alert-banner-icon{font-size:18px;color:var(--yellow)}
+.alert-banner-text{flex:1;font-size:13px}
+.alert-row{padding:10px 14px;border-bottom:1px solid var(--border);border-left:3px solid var(--border)}
+.alert-row.sev-critical{border-left-color:var(--red);background:rgba(239,83,80,.04)}
+.alert-row.sev-high    {border-left-color:var(--orange)}
+.alert-row.sev-medium  {border-left-color:var(--yellow);background:rgba(255,193,7,.03)}
+.alert-row.sev-low     {border-left-color:var(--green)}
+.alert-row-title{font-size:13px;font-weight:600;color:var(--silver-l)}
+.alert-row-desc{font-size:12px;color:var(--text-dim);margin-top:2px}
+.alert-row-time{font-size:11px;color:var(--text-dim);margin-top:4px}
+.alert-detail{padding:14px 16px;border-bottom:1px solid var(--border);border-left:3px solid var(--border)}
+.alert-detail.sev-critical{border-left-color:var(--red)}.alert-detail.sev-high{border-left-color:var(--orange)}
+.alert-detail.sev-medium{border-left-color:var(--yellow)}.alert-detail.resolved{opacity:.5}
+.alert-detail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.alert-detail-left{display:flex;align-items:center;gap:8px}
+.alert-detail-right{display:flex;align-items:center;gap:10px}
+.alert-detail-desc{font-size:13px;color:var(--text-dim)}
+.alert-payload{margin-top:8px;background:var(--bg);border-radius:4px;padding:8px;overflow-x:auto}
+.alert-meta{margin-top:6px}
+.sev-dot{display:inline-block;width:8px;height:8px;border-radius:50%}
+.sev-dot.sev-critical{background:var(--red)}.sev-dot.sev-high{background:var(--orange)}
+.sev-dot.sev-medium{background:var(--yellow)}.sev-dot.sev-low{background:var(--green)}
+.empty-state-sm{padding:20px 14px;text-align:center;font-size:12px;color:var(--text-dim)}
+/* ── Supervisor card ── */
+.supervisor-card{border:1px solid var(--border);border-radius:6px;margin-bottom:16px;overflow:hidden}
+.sup-header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--bg3)}
+.sup-name{font-size:15px;font-weight:700;color:var(--silver-ll);margin-right:10px}
+.sup-stats{display:flex;align-items:center;gap:10px}
+.sup-team{padding:8px}
+/* ── Capacity ── */
+.capacity-row{padding:10px 14px;border-bottom:1px solid var(--border)}
+.capacity-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px}
+.capacity-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.capacity-fill{height:100%;border-radius:3px}
+.fill-green{background:var(--green)}.fill-yellow{background:var(--yellow)}.fill-red{background:var(--red)}
+.capacity-pct{font-size:11px;color:var(--text-dim);text-align:right}
+.hazard-1{color:var(--green)}.hazard-2{color:#8bc34a}.hazard-3{color:var(--yellow)}.hazard-4{color:var(--orange)}.hazard-5{color:var(--red)}
+/* ── Warnings ── */
+.warning-row{padding:12px 16px;border-bottom:1px solid var(--border)}
+.warning-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+/* ── Item checklist ── */
+.item-checklist{max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:8px}
+.check-row{display:flex;align-items:flex-start;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px}
+.check-row:hover{background:var(--bg3);border-radius:3px}
+/* ── Modal ── */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:24px;width:100%;max-width:420px}
+.modal-title{font-size:16px;font-weight:700;color:var(--silver-ll);margin-bottom:12px}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+/* ── Log JSON ── */
+.log-json{font-size:11px;color:var(--text-dim);white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;background:var(--bg);padding:6px;border-radius:3px}
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:48px 24px;color:var(--text-dim)}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.empty-title{font-size:16px;font-weight:600;color:var(--silver);margin-bottom:6px}
+/* ── Alert pill topbar ── */
+.alert-pill{background:#3b1a1a;border:1px solid var(--red);color:#ef9a9a;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;text-decoration:none}
+.material-row{margin-bottom:8px}
+select option{background:var(--bg2)}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">♻ EWaste RMS</div>
+    <div class="sub">Recycling Management v3</div>
+  </div>
+
+  {% if current_user.role %}
+  <div class="sidebar-role">
+    {% if current_user.role == 'admin' %}⬡ Admin
+    {% elif current_user.sub_role == 'supervisor' %}▲ Supervisor
+    {% elif current_user.sub_role == 'driver' %}⊡ Driver
+    {% elif current_user.sub_role == 'collector' %}⊞ Collector
+    {% elif current_user.role == 'user' %}◈ Citizen
+    {% endif %}
+  </div>
+
+  <nav>
+  {% if current_user.role == 'user' %}
+    <div class="nav-group">
+      <a href="{{ url_for('user_dashboard') }}" class="nav-link {% if request.endpoint=='user_dashboard' %}active{% endif %}"><i class="icon">◈</i> Dashboard</a>
+      <a href="{{ url_for('user_pickups') }}" class="nav-link {% if 'pickup' in (request.endpoint or '') %}active{% endif %}"><i class="icon">⊞</i> My Pickups</a>
+      <a href="{{ url_for('user_payments') }}" class="nav-link {% if request.endpoint=='user_payments' %}active{% endif %}"><i class="icon">৳</i> Payments</a>
+      <a href="{{ url_for('user_history') }}" class="nav-link {% if request.endpoint=='user_history' %}active{% endif %}"><i class="icon">◷</i> History</a>
+    </div>
+
+  {% elif current_user.role == 'staff' and current_user.sub_role == 'supervisor' %}
+    <div class="nav-group">
+      <a href="{{ url_for('sup_dashboard') }}" class="nav-link {% if request.endpoint=='sup_dashboard' %}active{% endif %}"><i class="icon">▲</i> Dashboard</a>
+      <a href="{{ url_for('sup_pickups') }}" class="nav-link {% if 'sup_pick' in (request.endpoint or '') %}active{% endif %}"><i class="icon">⊞</i> Pickups</a>
+      <a href="{{ url_for('sup_payments') }}" class="nav-link {% if 'sup_pay' in (request.endpoint or '') %}active{% endif %}"><i class="icon">৳</i> Payments</a>
+      <a href="{{ url_for('sup_batches') }}" class="nav-link {% if 'batch' in (request.endpoint or '') %}active{% endif %}"><i class="icon">⬡</i> Batches</a>
+      <a href="{{ url_for('sup_team') }}" class="nav-link {% if request.endpoint=='sup_team' %}active{% endif %}"><i class="icon">◉</i> My Team</a>
+      <a href="{{ url_for('sup_history') }}" class="nav-link {% if request.endpoint=='sup_history' %}active{% endif %}"><i class="icon">◷</i> History</a>
+    </div>
+
+  {% elif current_user.role == 'staff' %}
+    <div class="nav-group">
+      <a href="{{ url_for('field_dashboard') }}" class="nav-link {% if request.endpoint=='field_dashboard' %}active{% endif %}"><i class="icon">⊡</i> Dashboard</a>
+      <a href="{{ url_for('field_assignments') }}" class="nav-link {% if 'assignment' in (request.endpoint or '') %}active{% endif %}"><i class="icon">⊞</i> Assignments</a>
+      <a href="{{ url_for('field_history') }}" class="nav-link {% if request.endpoint=='field_history' %}active{% endif %}"><i class="icon">◷</i> History</a>
+    </div>
+
+  {% elif current_user.role == 'admin' %}
+    <div class="nav-group">
+      <div class="nav-label">Operations</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint=='admin_dashboard' %}active{% endif %}"><i class="icon">◈</i> Dashboard</a>
+      <a href="{{ url_for('admin_pickups') }}" class="nav-link {% if request.endpoint=='admin_pickups' %}active{% endif %}"><i class="icon">⊞</i> Pickups</a>
+      <a href="{{ url_for('admin_batches') }}" class="nav-link {% if request.endpoint=='admin_batches' %}active{% endif %}"><i class="icon">⬡</i> Batches</a>
+      <a href="{{ url_for('admin_reports') }}" class="nav-link {% if request.endpoint=='admin_reports' %}active{% endif %}"><i class="icon">◑</i> Reports</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">People</div>
+      <a href="{{ url_for('admin_staff') }}" class="nav-link {% if request.endpoint=='admin_staff' %}active{% endif %}"><i class="icon">◉</i> Staff</a>
+      <a href="{{ url_for('admin_vehicles') }}" class="nav-link {% if request.endpoint=='admin_vehicles' %}active{% endif %}"><i class="icon">⊡</i> Vehicles</a>
+      <a href="{{ url_for('admin_users') }}" class="nav-link {% if request.endpoint=='admin_users' %}active{% endif %}"><i class="icon">◈</i> Users</a>
+      <a href="{{ url_for('admin_warnings') }}" class="nav-link {% if request.endpoint=='admin_warnings' %}active{% endif %}"><i class="icon">⚑</i> Warnings</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">System</div>
+      <a href="{{ url_for('admin_alerts') }}" class="nav-link {% if request.endpoint=='admin_alerts' %}active{% endif %}">
+        <i class="icon">◎</i> Alerts
+        {% if unresolved_alerts > 0 %}<span class="nav-badge">{{ unresolved_alerts }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('admin_logs') }}" class="nav-link {% if request.endpoint=='admin_logs' %}active{% endif %}"><i class="icon">⌷</i> Audit Logs</a>
+      <a href="{{ url_for('admin_history') }}" class="nav-link {% if request.endpoint=='admin_history' %}active{% endif %}"><i class="icon">◷</i> History</a>
+    </div>
+  {% endif %}
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-name">{{ current_user.full_name }}</div>
+    <a href="{{ url_for('logout') }}">Sign Out</a>
+  </div>
+  {% endif %}
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">{% block page_title %}{% endblock %}</span>
+    <div style="display:flex;gap:10px;align-items:center">
+      {% if current_user.role == 'admin' and unresolved_alerts > 0 %}
+        <a href="{{ url_for('admin_alerts') }}" class="alert-pill">⚠ {{ unresolved_alerts }} Alert{{ 's' if unresolved_alerts != 1 }}</a>
+      {% endif %}
+      <span style="font-size:12px;color:var(--text-dim)">{{ current_user.username }}</span>
+    </div>
+  </div>
+
+  {% with msgs = get_flashed_messages(with_categories=True) %}
+  {% if msgs %}
+  <div class="flash-stack">
+    {% for cat, msg in msgs %}
+    <div class="alert alert-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+</body>
+</html>
